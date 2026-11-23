@@ -238,12 +238,15 @@ def main(argv: list[str] | None = None) -> None:
         argv = sys.argv[1:]
 
     # Default to 'simulate' if flags or no subcommands are passed directly
-    subcommands = {"simulate", "serve", "benchmark", "terraform", "vc-gauntlet", "dataset-benchmark", "canonical-benchmarks", "patch", "mcp-toolbox", "tensorflow"}
+    subcommands = {"simulate", "serve", "benchmark", "terraform", "vc-gauntlet", "dataset-benchmark", "canonical-benchmarks", "patch", "mcp-toolbox", "tensorflow", "tf-audit"}
     if not argv or (argv[0] not in subcommands and argv[0] not in {"-h", "--help", "-v", "--version"}):
         argv = ["simulate"] + argv
 
     parser = argparse.ArgumentParser(description="OmniSim: Universal Counterfactual Simulation Engine")
     subparsers = parser.add_subparsers(dest="command", help="Sub-commands")
+
+    # tf-audit command
+    tf_audit_parser = subparsers.add_parser("tf-audit", help="Run blind architectural audit of current TensorFlow state against active user issues")
 
     # tensorflow command
     tf_bench_parser = subparsers.add_parser("tensorflow", help="Run blind historical validation against tensorflow/tensorflow distributed runtime bugs")
@@ -289,7 +292,13 @@ def main(argv: list[str] | None = None) -> None:
 
     args = parser.parse_args(argv)
 
-    if args.command == "tensorflow":
+    if args.command == "tf-audit":
+        from benchmarks.tensorflow_current_state_audit import TensorFlowCurrentStateAuditor, main as run_tf_audit
+        report = TensorFlowCurrentStateAuditor.run_current_audit()
+        if report.critical_breaches_predicted == 0:
+            sys.exit(1)
+        run_tf_audit()
+    elif args.command == "tensorflow":
         from benchmarks.tensorflow_historical_validation import TensorFlowHistoricalValidator, main as run_tf_validation
         suite_report = TensorFlowHistoricalValidator.run_all()
         if suite_report.incidents_caught != suite_report.incidents_tested:

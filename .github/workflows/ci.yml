@@ -41,6 +41,7 @@ jobs:
           python -m omnisim.cli canonical-benchmarks
           python -m omnisim.cli mcp-toolbox
           python -m omnisim.cli tensorflow
+          python -m omnisim.cli tf-audit
 
       - name: Verify GitHub Action Pre-Flight Gate
         uses: ./
