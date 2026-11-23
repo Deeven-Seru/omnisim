@@ -173,6 +173,36 @@ def run_terraform_audit_cmd(hcl_text: str = "") -> None:
         print("\n[OK] Terraform plan passed all pre-flight counterfactual checks.\n")
 
 
+def run_patch_cmd(hcl_text: str = "") -> None:
+    print("\n[AUTO_REMEDIATION] Analyzing infrastructure code for autonomous self-healing...")
+    if not hcl_text:
+        hcl_text = """
+        resource "aws_autoscaling_group" "web_asg" {
+          name     = "prod-web"
+          min_size = 4
+          max_size = 28
+        }
+        resource "aws_db_instance" "postgres" {
+          name           = "prod-db"
+          instance_class = "db.t3.medium"
+        }
+        """
+    from omnisim.agent.remediator import AutonomousAutoRemediator
+    result = AutonomousAutoRemediator.audit_and_generate_patch(hcl_text)
+    if result.is_vulnerable:
+        print(f"[VULNERABILITY_FOUND] Detected {result.violations_detected} critical capacity breaches.")
+        print("\n" + "=" * 80)
+        print("GENERATED AUTONOMOUS GIT UNIFIED DIFF PATCH:")
+        print("=" * 80)
+        print(result.unified_diff)
+        print("=" * 80)
+        for r in result.applied_rules:
+            print(f"[REMEDIATION_RULE] {r}")
+        print("\nApply this patch directly via: `git apply remediation.patch`\n")
+    else:
+        print("[OK] Infrastructure code is resilient. 0 violations detected.\n")
+
+
 def run_benchmark_cmd(domain: str, rollouts: int, horizon: int) -> None:
     print(f"\n[BENCHMARK] Benchmarking OmniSim High-Throughput Rollouts ({rollouts} parallel trajectories)...")
     if domain == "systems":
@@ -199,7 +229,7 @@ def main(argv: list[str] | None = None) -> None:
         argv = sys.argv[1:]
 
     # Default to 'simulate' if flags or no subcommands are passed directly
-    subcommands = {"simulate", "serve", "benchmark", "terraform", "vc-gauntlet", "dataset-benchmark", "canonical-benchmarks"}
+    subcommands = {"simulate", "serve", "benchmark", "terraform", "vc-gauntlet", "dataset-benchmark", "canonical-benchmarks", "patch"}
     if not argv or (argv[0] not in subcommands and argv[0] not in {"-h", "--help", "-v", "--version"}):
         argv = ["simulate"] + argv
 
@@ -223,7 +253,13 @@ def main(argv: list[str] | None = None) -> None:
 
     # terraform command
     tf_parser = subparsers.add_parser("terraform", help="Audit Terraform IaC plans for production fires")
-    tf_parser.add_argument("--file", type=str, default="", help="Path to .tf or plan file")
+    tf_parser.add_argument("file", nargs="?", default="", help="Path to .tf or plan file (positional)")
+    tf_parser.add_argument("--file", dest="file_flag", type=str, default="", help="Path to .tf or plan file")
+
+    # patch command
+    patch_parser = subparsers.add_parser("patch", help="Generate automated Git unified diff patch for vulnerable infrastructure")
+    patch_parser.add_argument("file", nargs="?", default="", help="Path to .tf or plan file (positional)")
+    patch_parser.add_argument("--file", dest="file_flag", type=str, default="", help="Path to .tf or plan file")
 
     # vc-gauntlet command
     gauntlet_parser = subparsers.add_parser("vc-gauntlet", help="Run Ruthless VC Zero-Bias Diligence Gauntlet")
@@ -236,7 +272,14 @@ def main(argv: list[str] | None = None) -> None:
 
     args = parser.parse_args(argv)
 
-    if args.command == "canonical-benchmarks":
+    if args.command == "patch":
+        hcl_content = ""
+        target_path = args.file or getattr(args, "file_flag", "")
+        if target_path:
+            with open(target_path, "r") as f:
+                hcl_content = f.read()
+        run_patch_cmd(hcl_content)
+    elif args.command == "canonical-benchmarks":
         from benchmarks.canonical_microservices_benchmark import CanonicalMicroservicesBenchmarkSuite
         suite = CanonicalMicroservicesBenchmarkSuite()
         report = suite.run_all()
@@ -256,8 +299,9 @@ def main(argv: list[str] | None = None) -> None:
             sys.exit(1)
     elif args.command == "terraform":
         hcl_content = ""
-        if args.file:
-            with open(args.file, "r") as f:
+        target_path = args.file or getattr(args, "file_flag", "")
+        if target_path:
+            with open(target_path, "r") as f:
                 hcl_content = f.read()
         run_terraform_audit_cmd(hcl_content)
     elif args.command == "serve":
