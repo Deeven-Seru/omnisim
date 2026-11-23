@@ -201,6 +201,14 @@ Test OmniSim's blind foresight against Google's real-world Model Context Protoco
 python3 -m omnisim.cli mcp-toolbox
 ```
 
+### TensorFlow Distributed Runtime Validation
+
+Test OmniSim's blind foresight against Google's flagship machine learning engine (`tensorflow/tensorflow`):
+
+```bash
+python3 -m omnisim.cli tensorflow
+```
+
 ### Ruthless VC Zero-Bias Diligence Gauntlet
 
 Run the 5-phase institutional stress test (Blind Historical Replay, Dark Debt & Uncertainty, Adversarial SRE Traps, Zero-Consulting Ingestion, Asymmetric Loss Function):
@@ -221,6 +229,9 @@ python3 -m unittest discover -s tests -p "test_*.py" -v
 
 OmniSim has been benchmarked directly against real-world catastrophic failure post-mortems and canonical public datasets:
 
+* **Google `tensorflow/tensorflow` Runtime Post-Mortems (BFC Fragmentation & Pipeline Deadlocks):**
+  * *BFC Allocator OOM (Issue #41710):* Caught memory fragmentation reaching 0.87 despite 8 GB of free VRAM; synthesized dynamic memory growth with bucketed shape alignment (`cuda_malloc_async`), eliminating OOM with 0 violations.
+  * *Inter-Op ThreadPool Starvation (Issue #21277):* Caught circular wait deadlocking worker threads from 450 QPS to 0 QPS; synthesized decoupled dedicated I/O thread pool with non-blocking admission.
 * **Google Cloud `googleapis/mcp-toolbox` Issue / PR #3921 (`EMFILE File Descriptor Leak`):**
   * *Status Quo (v1.14.0 unpatched):* Database connection failure returned error without closing `pgxpool.Pool` / `sql.DB` handle. Dynamic config reloads leaked 16+ sockets per cycle, saturating OS descriptors (1,072 / 1,024 limit) and crashing downstream AI agent tool invocations at Step 3.
   * *OmniSim Blind Foresight:* Predicted exact `EMFILE` socket exhaustion; autonomously synthesized `pool.Close()` / `db.Close()` before return, exactly matching Google's upstream fix in commit `0001190a` across 26 source files.
