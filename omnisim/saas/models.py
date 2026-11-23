@@ -75,14 +75,30 @@ class APIKey:
     prefix: str
     created_at: float = field(default_factory=time.time)
     last_used_at: Optional[float] = None
-    scopes: List[str] = field(default_factory=lambda: ["simulate", "ingest", "webhooks"])
+    scopes: List[str] = field(default_factory=lambda: ["simulations:write", "telemetry:write", "webhooks:write"])
+    expires_at: Optional[float] = None
+    revoked: bool = False
 
     @classmethod
-    def generate(cls, tenant_id: str, name: str = "Production CI Key") -> Tuple[APIKey, str]:
+    def generate(
+        cls,
+        tenant_id: str,
+        name: str = "Production CI Key",
+        scopes: Optional[List[str]] = None,
+        expires_at: Optional[float] = None,
+    ) -> Tuple[APIKey, str]:
         raw_token = f"os_live_{secrets.token_hex(24)}"
         prefix = raw_token[:12]
         key_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
-        return cls(key_hash=key_hash, tenant_id=tenant_id, name=name, prefix=prefix), raw_token
+        resolved_scopes = scopes if scopes is not None else ["simulations:write", "telemetry:write", "webhooks:write"]
+        return cls(
+            key_hash=key_hash,
+            tenant_id=tenant_id,
+            name=name,
+            prefix=prefix,
+            scopes=resolved_scopes,
+            expires_at=expires_at,
+        ), raw_token
 
 
 @dataclass
@@ -93,13 +109,14 @@ class SimulationRecord:
     domain: str
     horizon: int
     status: str  # 'COMPLETED', 'BLOCKED', 'FAILED'
-    critical_violations_count: int
-    optimal_action_name: str
-    optimal_action_cost: float
-    recommendation: str
-    execution_time_ms: float
+    critical_violations_count: int = 0
+    optimal_action_name: str = ""
+    optimal_action_cost: float = 0.0
+    recommendation: str = ""
+    execution_time_ms: float = 0.0
     created_at: float = field(default_factory=time.time)
     metadata: Dict[str, Any] = field(default_factory=dict)
+    traffic_scale: float = 1.0
 
 
 @dataclass

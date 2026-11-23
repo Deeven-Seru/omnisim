@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
+import os
 import time
 import uuid
 from typing import Any, Dict, List, Optional, Tuple
@@ -16,6 +18,7 @@ from omnisim.domains.systems import build_cloud_systems_scenario
 from omnisim.ingest.terraform import TerraformIngester
 from omnisim.models.dynamics import WorldDynamicsModel
 from omnisim.models.search import CounterfactualMCTS
+from omnisim.saas.db import Database, DEFAULT_DB_PATH
 from omnisim.saas.models import (
     APIKey,
     GitHubPRAudit,
@@ -25,108 +28,152 @@ from omnisim.saas.models import (
     Tenant,
 )
 
+VALID_DOMAINS = {"systems", "cyber", "supply_chain", "enterprise"}
+
+
+class _TenantsProxy:
+    """Dict-compatible accessor for tenants backed by the database."""
+    def __init__(self, platform: "OmniSimSaaSPlatform"):
+        self._platform = platform
+
+    def __getitem__(self, tenant_id: str) -> Tenant:
+        tenant = self._platform.db.get_tenant(tenant_id)
+        if not tenant:
+            if tenant_id == "org_enterprise_acme":
+                self._platform._bootstrap_demo_accounts()
+                tenant = self._platform.db.get_tenant(tenant_id)
+            if not tenant:
+                raise KeyError(f"Tenant '{tenant_id}' not found.")
+        return tenant
+
+    def __contains__(self, tenant_id: str) -> bool:
+        return self._platform.db.get_tenant(tenant_id) is not None
+
+    def get(self, tenant_id: str, default: Any = None) -> Any:
+        try:
+            return self[tenant_id]
+        except KeyError:
+            return default
+
 
 class OmniSimSaaSPlatform:
-    """Enterprise multi-tenant control plane for OmniSim Cloud."""
+    """Enterprise multi-tenant control plane for OmniSim Cloud with durable persistence."""
 
-    def __init__(self):
-        self.tenants: Dict[str, Tenant] = {}
-        self.api_keys: Dict[str, APIKey] = {}  # key_hash -> APIKey
-        self.simulations: Dict[str, SimulationRecord] = {}
-        self.pr_audits: List[GitHubPRAudit] = []
+    def __init__(self, db: Optional[Database] = None, enable_demo_mode: bool = False):
+        self.db = db or Database()
+        self.enable_demo_mode = enable_demo_mode or (os.environ.get("OMNISIM_DEMO_MODE", "0") in ("1", "true", "True"))
         self.rate_counters: Dict[str, List[float]] = {}  # tenant_id -> list of timestamps
 
-        # Bootstrap default tier tenants for demonstration and verification
-        self._bootstrap_demo_accounts()
+        # In demo mode only, bootstrap local mock accounts
+        if self.enable_demo_mode:
+            self._bootstrap_demo_accounts()
+
+    @property
+    def tenants(self) -> _TenantsProxy:
+        return _TenantsProxy(self)
 
     def _bootstrap_demo_accounts(self) -> None:
-        # Default enterprise tenant
-        ent_tenant = Tenant(
-            id="org_enterprise_acme",
-            name="Acme Global Financial Services",
-            tier=PlanTier.ENTERPRISE,
-        )
-        self.tenants[ent_tenant.id] = ent_tenant
-        k_ent, raw_ent = APIKey.generate(ent_tenant.id, name="Acme Production Key")
-        self.api_keys[k_ent.key_hash] = k_ent
-
-        # Default pro tenant
-        pro_tenant = Tenant(
-            id="org_pro_stripe_scale",
-            name="Stripe Scale Tech",
-            tier=PlanTier.PRO,
-        )
-        self.tenants[pro_tenant.id] = pro_tenant
-        k_pro, raw_pro = APIKey.generate(pro_tenant.id, name="Stripe Scale CI Key")
-        self.api_keys[k_pro.key_hash] = k_pro
-
-        # Default free tenant
-        free_tenant = Tenant(
-            id="org_free_dev",
-            name="Developer Sandbox",
-            tier=PlanTier.FREE,
-        )
-        self.tenants[free_tenant.id] = free_tenant
-        k_free, raw_free = APIKey.generate(free_tenant.id, name="Developer Key")
-        self.api_keys[k_free.key_hash] = k_free
-
-        # Populate initial PR audits
-        self.pr_audits.append(
-            GitHubPRAudit(
-                id="audit_pr_104",
-                tenant_id=ent_tenant.id,
-                repo="acme/cloud-infrastructure",
-                pr_number=104,
-                commit_sha="a8f12c4",
-                verdict="BLOCKED",
-                critical_breaches=3,
-                recommended_fix="Change instance_class from db.t3.medium to db.r6g.large to prevent connection exhaustion",
-                audit_summary="OmniSim pre-flight simulation detected 3 critical SLA breaches: ASG max_size 28 requires 504 connections exceeding db.t3.medium 412 ceiling.",
-            )
-        )
-        self.pr_audits.append(
-            GitHubPRAudit(
-                id="audit_pr_105",
-                tenant_id=ent_tenant.id,
-                repo="acme/cloud-infrastructure",
-                pr_number=105,
-                commit_sha="571b678",
-                verdict="PASS",
-                critical_breaches=0,
-                recommended_fix="None required (All invariants satisfied)",
-                audit_summary="Remediated Terraform plan verified: RDS db.r6g.large maintains pool saturation at 36.9% under peak load.",
-            )
-        )
+        ent = self.db.get_tenant("org_enterprise_acme")
+        if not ent:
+            ent = Tenant(id="org_enterprise_acme", name="Acme Global Financial Services", tier=PlanTier.ENTERPRISE)
+            self.db.save_tenant(ent)
+            k_ent, raw_ent = APIKey.generate(ent.id, name="Acme Production Key", scopes=["simulations:write", "telemetry:write", "webhooks:write", "admin"])
+            self.db.save_api_key(k_ent)
 
     # --------------------------------------------------------------------------
     # Authentication & Tenancy
     # --------------------------------------------------------------------------
-    def create_tenant(self, name: str, tier: str = "PRO") -> Tuple[Tenant, str]:
+    def create_tenant(self, name: str, tier: str = "FREE", is_admin_request: bool = False) -> Tuple[Tenant, str]:
+        """Creates a tenant. Public signups are strictly restricted to the FREE tier."""
         t_id = f"org_{uuid.uuid4().hex[:12]}"
-        plan = PlanTier(tier.upper())
-        tenant = Tenant(id=t_id, name=name, tier=plan)
-        self.tenants[t_id] = tenant
 
-        api_key, raw_token = APIKey.generate(t_id, name=f"{name} Primary Key")
-        self.api_keys[api_key.key_hash] = api_key
+        # Security control: Non-admin public signups cannot self-assign PRO or ENTERPRISE
+        requested_tier = tier.upper()
+        if not is_admin_request or requested_tier not in [t.value for t in PlanTier]:
+            plan = PlanTier.FREE
+        else:
+            plan = PlanTier(requested_tier)
+
+        tenant = Tenant(id=t_id, name=name, tier=plan)
+        self.db.save_tenant(tenant)
+
+        # Generate initial tenant key with standard scopes
+        api_key, raw_token = APIKey.generate(
+            t_id,
+            name=f"{name} Primary Key",
+            scopes=["simulations:write", "telemetry:write", "webhooks:write", "admin"]
+        )
+        self.db.save_api_key(api_key)
         return tenant, raw_token
 
-    def authenticate_token(self, raw_token: str) -> Optional[Tenant]:
+    def authenticate_token(self, raw_token: str) -> Optional[Tuple[Tenant, APIKey]]:
+        """Authenticates token against durable storage, checking revocation and expiration."""
         if not raw_token:
             return None
-        # Clean token format
         if raw_token.startswith("Bearer "):
             raw_token = raw_token[7:].strip()
 
         token_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
-        api_key = self.api_keys.get(token_hash)
+        api_key = self.db.get_api_key_by_hash(token_hash)
         if not api_key:
             return None
 
-        tenant = self.tenants.get(api_key.tenant_id)
-        if tenant:
-            api_key.last_used_at = time.time()
-        return tenant
+        # Check revocation
+        if api_key.revoked:
+            return None
+
+        # Check expiration
+        if api_key.expires_at and time.time() > api_key.expires_at:
+            return None
+
+        tenant = self.db.get_tenant(api_key.tenant_id)
+        if not tenant:
+            return None
+
+        # Update last used
+        self.db.update_key_last_used(token_hash)
+        return tenant, api_key
+
+    def create_api_key(
+        self,
+        tenant_id: str,
+        name: str = "CI Deployment Key",
+        scopes: Optional[List[str]] = None,
+        expires_in_days: Optional[int] = None,
+    ) -> Tuple[APIKey, str]:
+        """Mints an API key for an authenticated tenant with least-privilege scopes."""
+        allowed_scopes = {"simulations:write", "telemetry:write", "webhooks:write", "admin"}
+        if scopes:
+            valid_scopes = [s for s in scopes if s in allowed_scopes]
+        else:
+            valid_scopes = ["simulations:write", "telemetry:write", "webhooks:write"]
+
+        expires_at = time.time() + (expires_in_days * 86400.0) if expires_in_days else None
+        api_key, raw_token = APIKey.generate(
+            tenant_id=tenant_id,
+            name=name,
+            scopes=valid_scopes,
+            expires_at=expires_at,
+        )
+        self.db.save_api_key(api_key)
+        return api_key, raw_token
+
+    def list_api_keys(self, tenant_id: str) -> List[Dict[str, Any]]:
+        keys = self.db.list_api_keys_for_tenant(tenant_id)
+        return [
+            {
+                "name": k.name,
+                "prefix": k.prefix,
+                "scopes": k.scopes,
+                "created_at": k.created_at,
+                "expires_at": k.expires_at,
+                "last_used_at": k.last_used_at,
+            }
+            for k in keys
+        ]
+
+    def revoke_api_key(self, tenant_id: str, prefix_or_hash: str) -> bool:
+        return self.db.revoke_api_key(tenant_id, prefix_or_hash)
 
     def check_rate_limit(self, tenant: Tenant) -> Tuple[bool, str]:
         now = time.time()
@@ -136,7 +183,6 @@ class OmniSimSaaSPlatform:
         if tenant.id not in self.rate_counters:
             self.rate_counters[tenant.id] = []
 
-        # Prune old timestamps
         self.rate_counters[tenant.id] = [ts for ts in self.rate_counters[tenant.id] if ts >= window_start]
 
         if len(self.rate_counters[tenant.id]) >= limit:
@@ -156,12 +202,20 @@ class OmniSimSaaSPlatform:
         traffic_scale: float = 1.2,
         custom_actions: Optional[List[Dict[str, Any]]] = None,
     ) -> Dict[str, Any]:
-        # 1. Quota Check
+        # Validate domain strictly
+        if domain not in VALID_DOMAINS:
+            raise ValueError(f"Invalid simulation domain '{domain}'. Must be one of: {sorted(list(VALID_DOMAINS))}")
+
+        # Enforce horizon boundaries
+        if horizon < 1 or horizon > 20:
+            raise ValueError(f"Simulation horizon {horizon} out of bounds. Must be between 1 and 20.")
+
+        # Quota Check
         can_run, err = tenant.can_simulate()
         if not can_run:
             raise PermissionError(err)
 
-        # 2. Rate Limit Check
+        # Rate Limit Check
         ok_rate, rate_err = self.check_rate_limit(tenant)
         if not ok_rate:
             raise PermissionError(rate_err)
@@ -204,13 +258,16 @@ class OmniSimSaaSPlatform:
         best_viable = next((t for t in candidate_trajs if t.is_valid), None)
         exec_ms = (time.perf_counter() - t0) * 1000.0
 
-        tenant.record_simulation()
+        # Increment usage in durable database
+        new_usage = self.db.increment_tenant_usage(tenant.id)
+        tenant.monthly_usage_count = new_usage
+
         sim_id = f"sim_{uuid.uuid4().hex[:12]}"
         rec_status = "COMPLETED" if best_viable else "BLOCKED"
         opt_name = best_viable.name if best_viable else "None (All Interventions Failed Invariants)"
         opt_cost = best_viable.total_cost if best_viable else 0.0
         rec_text = (
-            f"Optimal intervention: Deploy '{opt_name}' ($ {opt_cost:,.2f}) to guarantee 0 downtime."
+            f"Optimal intervention: Deploy '{opt_name}' ($ {opt_cost:,.2f}) to eliminate downtime risk."
             if best_viable else "Critical boundary breach: all tested interventions violate SLA limits."
         )
 
@@ -219,14 +276,13 @@ class OmniSimSaaSPlatform:
             tenant_id=tenant.id,
             domain=domain,
             horizon=horizon,
+            traffic_scale=traffic_scale,
             status=rec_status,
-            critical_violations_count=len(baseline_traj.all_violations),
             optimal_action_name=opt_name,
             optimal_action_cost=opt_cost,
-            recommendation=rec_text,
             execution_time_ms=exec_ms,
         )
-        self.simulations[sim_id] = record
+        self.db.save_simulation(record)
 
         return {
             "simulation_id": sim_id,
@@ -254,24 +310,39 @@ class OmniSimSaaSPlatform:
                 for t in candidate_trajs
             ],
             "execution_time_ms": round(exec_ms, 2),
-            "quota_remaining": TIER_LIMITS[tenant.tier]["monthly_simulations"] - tenant.monthly_usage_count,
+            "quota_remaining": max(0, TIER_LIMITS[tenant.tier]["monthly_simulations"] - new_usage),
         }
 
     # --------------------------------------------------------------------------
     # GitHub App & Actions PR Webhook Receiver
     # --------------------------------------------------------------------------
+    @staticmethod
+    def verify_github_webhook_signature(secret: str, payload_bytes: bytes, signature_header: str) -> bool:
+        """Verifies GitHub X-Hub-Signature-256 HMAC-SHA256 signature."""
+        if not signature_header or not secret:
+            return False
+        if not signature_header.startswith("sha256="):
+            return False
+        expected_sig = "sha256=" + hmac.new(secret.encode("utf-8"), payload_bytes, hashlib.sha256).hexdigest()
+        return hmac.compare_digest(expected_sig, signature_header)
+
     def process_github_pr_webhook(
         self,
         tenant: Tenant,
-        payload: Dict[str, Any]
+        payload: Dict[str, Any],
+        delivery_id: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Ingests a GitHub Pull Request webhook, runs pre-flight simulation, and emits a PR review audit."""
+        """Ingests a GitHub Pull Request webhook with replay protection and emits an audit."""
+        if delivery_id:
+            is_new = self.db.record_webhook_delivery(delivery_id, tenant.id, "pull_request")
+            if not is_new:
+                raise ValueError(f"Duplicate webhook delivery ID: {delivery_id}")
+
         repo = payload.get("repository", {}).get("full_name", "unknown/repo")
         pr_number = payload.get("pull_request", {}).get("number", 1)
         commit_sha = payload.get("pull_request", {}).get("head", {}).get("sha", "head_sha")[:7]
         hcl_patch = payload.get("diff_hcl", "")
 
-        # Default real-world scalable AWS infrastructure if no patch provided
         if not hcl_patch:
             hcl_patch = """
             resource "aws_autoscaling_group" "web_asg" {
@@ -288,7 +359,6 @@ class OmniSimSaaSPlatform:
         t0 = time.perf_counter()
         state = TerraformIngester.parse_hcl_text(hcl_patch)
 
-        # Simulate peak traffic surge across the proposed Terraform topology
         dynamics = WorldDynamicsModel()
         def asg_burst(st: UniversalState, act: Action):
             asg = st.entities.get("asg_web_asg")
@@ -330,9 +400,8 @@ class OmniSimSaaSPlatform:
             recommended_fix=rec_fix,
             audit_summary=summary,
         )
-        self.pr_audits.insert(0, audit)
+        self.db.save_pr_audit(audit)
 
-        # Markdown formatted PR comment payload for GitHub Actions
         markdown_comment = (
             f"### [OMNISIM CLOUD PRE-FLIGHT AUDIT: {verdict}]\n\n"
             f"**Repository:** `{repo}` | **PR:** `#{pr_number}` | **Commit:** `{commit_sha}`\n\n"

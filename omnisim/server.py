@@ -1,16 +1,18 @@
 """Enterprise REST & Headless Agent Gateway for OmniSim.
 
-Exposes OmniSim's counterfactual simulation engine via REST APIs
+Exposes OmniSim's counterfactual simulation engine via production-grade REST APIs
 for CI/CD pipelines, Kubernetes controllers, and enterprise monitoring stacks.
 """
 
 from __future__ import annotations
 
+import argparse
 import http.server
 import json
+import os
 import socketserver
 import urllib.parse
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Tuple
 
 from omnisim.core.action import Action, InterventionType
 from omnisim.core.state import Entity, Invariant, UniversalState
@@ -21,47 +23,148 @@ from omnisim.domains.systems import build_cloud_systems_scenario
 from omnisim.engine.batched_simulator import BatchedSimulator
 from omnisim.ingest.k8s import KubernetesManifestIngester
 from omnisim.models.search import CounterfactualMCTS
-from omnisim.saas.engine import OmniSimSaaSPlatform
+from omnisim.saas.engine import OmniSimSaaSPlatform, VALID_DOMAINS
+from omnisim.saas.models import APIKey, PlanTier, TIER_LIMITS, Tenant
 from omnisim.saas.portal import SAAS_PORTAL_HTML
 from omnisim.visualizer import HTML_TEMPLATE
 
 DEFAULT_PORT = 8088
+DEFAULT_HOST = "127.0.0.1"
+MAX_REQUEST_BODY_BYTES = 5 * 1024 * 1024  # 5 MB
+SERVER_VERSION = "1.0.0"
 
-# Global SaaS Multi-Tenant Platform Instance
+# Global SaaS Platform Instance
 saas_platform = OmniSimSaaSPlatform()
 
 
 class OmniSimAPIServer(http.server.SimpleHTTPRequestHandler):
+    """Production HTTP Request Handler with strict authentication, RBAC, and boundary enforcement."""
 
-    def _get_authenticated_tenant(self):
-        auth_hdr = self.headers.get("Authorization", "")
-        tenant = saas_platform.authenticate_token(auth_hdr)
-        if not tenant:
-            # Fallback to default Acme Enterprise tenant for unauthenticated browser portal requests
-            tenant = saas_platform.tenants.get("org_enterprise_acme")
-        return tenant
+    server_version = f"OmniSim/{SERVER_VERSION}"
 
-    def do_GET(self):
+    def end_headers(self) -> None:
+        # Standard security headers across all responses
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("Referrer-Policy", "strict-origin-when-cross-origin")
+        self.send_header("Content-Security-Policy", "default-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;")
+        super().end_headers()
+
+    def _authenticate(self, required_scope: Optional[str] = None) -> Optional[Tuple[Tenant, APIKey]]:
+        """Authenticates request via Bearer token. Returns (tenant, api_key) or sends 401/403 and returns None."""
+        auth_hdr = self.headers.get("Authorization", "").strip()
+        if not auth_hdr:
+            self._send_error(
+                status=401,
+                title="Unauthorized",
+                detail="Missing Authorization header. Provide 'Authorization: Bearer <api_key>'.",
+            )
+            return None
+
+        auth_result = saas_platform.authenticate_token(auth_hdr)
+        if not auth_result:
+            self._send_error(
+                status=401,
+                title="Unauthorized",
+                detail="Invalid, revoked, or expired API key.",
+            )
+            return None
+
+        tenant, api_key = auth_result
+
+        # RBAC Scope Check
+        if required_scope:
+            if "admin" not in api_key.scopes and required_scope not in api_key.scopes:
+                self._send_error(
+                    status=403,
+                    title="Forbidden",
+                    detail=f"API key '{api_key.prefix}...' lacks required scope '{required_scope}'.",
+                )
+                return None
+
+        return tenant, api_key
+
+    def _send_json(self, data: Dict[str, Any], status: int = 200) -> None:
+        payload = json.dumps(data, indent=2).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(payload)))
+        self.end_headers()
+        self.wfile.write(payload)
+
+    def _send_error(self, status: int, title: str, detail: str) -> None:
+        """Emits RFC 7807 problem details JSON."""
+        error_doc = {
+            "type": f"https://omnisim.io/errors/{title.lower().replace(' ', '-')}",
+            "title": title,
+            "status": status,
+            "detail": detail,
+        }
+        self._send_json(error_doc, status=status)
+
+    def _read_json_payload(self) -> Optional[Dict[str, Any]]:
+        content_length_str = self.headers.get("Content-Length")
+        if not content_length_str:
+            self._send_error(status=400, title="Bad Request", detail="Missing Content-Length header.")
+            return None
+
+        try:
+            content_length = int(content_length_str)
+        except ValueError:
+            self._send_error(status=400, title="Bad Request", detail="Invalid Content-Length header.")
+            return None
+
+        if content_length > MAX_REQUEST_BODY_BYTES:
+            self._send_error(
+                status=413,
+                title="Payload Too Large",
+                detail=f"Request body exceeds maximum size limit of {MAX_REQUEST_BODY_BYTES} bytes.",
+            )
+            return None
+
+        try:
+            body_bytes = self.rfile.read(content_length)
+            return json.loads(body_bytes.decode("utf-8"))
+        except Exception as e:
+            self._send_error(status=400, title="Bad Request", detail=f"Malformed JSON: {str(e)}")
+            return None
+
+    # --------------------------------------------------------------------------
+    # GET Handlers
+    # --------------------------------------------------------------------------
+    def do_GET(self) -> None:
         parsed = urllib.parse.urlparse(self.path)
 
+        # Static Local Dashboard Views (Loopback presentation)
         if parsed.path in ["/", "/index.html", "/dashboard"]:
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.end_headers()
             self.wfile.write(SAAS_PORTAL_HTML.encode("utf-8"))
+            return
 
         elif parsed.path == "/visualizer":
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.end_headers()
             self.wfile.write(HTML_TEMPLATE.encode("utf-8"))
+            return
 
         elif parsed.path == "/health":
-            self._send_json({"status": "HEALTHY", "version": "0.1.0", "engine": "OmniSim SAC World Model", "platform": "OmniSim Cloud Multi-Tenant SaaS"})
+            self._send_json({
+                "status": "HEALTHY",
+                "version": SERVER_VERSION,
+                "engine": "OmniSim SAC World Model",
+                "platform": "OmniSim Cloud Multi-Tenant SaaS",
+            })
+            return
 
+        # Protected Tenant Operations
         elif parsed.path == "/api/v1/tenants/me":
-            tenant = self._get_authenticated_tenant()
-            from omnisim.saas.models import TIER_LIMITS
+            auth = self._authenticate()
+            if not auth:
+                return
+            tenant, _ = auth
             limits = TIER_LIMITS[tenant.tier]
             self._send_json({
                 "tenant_id": tenant.id,
@@ -69,158 +172,138 @@ class OmniSimAPIServer(http.server.SimpleHTTPRequestHandler):
                 "tier": tenant.tier.value,
                 "monthly_usage": tenant.monthly_usage_count,
                 "monthly_quota": limits["monthly_simulations"],
-                "quota_remaining": limits["monthly_simulations"] - tenant.monthly_usage_count,
+                "quota_remaining": max(0, limits["monthly_simulations"] - tenant.monthly_usage_count),
                 "limits": limits,
             })
+            return
 
         elif parsed.path == "/api/v1/billing/usage":
-            tenant = self._get_authenticated_tenant()
-            from omnisim.saas.models import TIER_LIMITS
+            auth = self._authenticate()
+            if not auth:
+                return
+            tenant, _ = auth
             limits = TIER_LIMITS[tenant.tier]
             self._send_json({
                 "tenant_id": tenant.id,
                 "tier": tenant.tier.value,
                 "monthly_usage": tenant.monthly_usage_count,
                 "monthly_quota": limits["monthly_simulations"],
-                "quota_remaining": limits["monthly_simulations"] - tenant.monthly_usage_count,
+                "quota_remaining": max(0, limits["monthly_simulations"] - tenant.monthly_usage_count),
                 "sla_guarantee": limits["sla_guarantee"],
             })
-
-        elif parsed.path == "/api/v1/pr-audits":
-            audits = [
-                {
-                    "id": a.id,
-                    "repo": a.repo,
-                    "pr_number": a.pr_number,
-                    "commit_sha": a.commit_sha,
-                    "verdict": a.verdict,
-                    "critical_breaches": a.critical_breaches,
-                    "recommended_fix": a.recommended_fix,
-                    "audit_summary": a.audit_summary,
-                }
-                for a in saas_platform.pr_audits
-            ]
-            self._send_json({"audits": audits})
-
-        elif parsed.path == "/api/v1/domains":
-            domains = [
-                {"id": "systems", "name": "Distributed Cloud & Microservices", "status": "AVAILABLE"},
-                {"id": "enterprise", "name": "Enterprise Economics & SaaS Pricing", "status": "AVAILABLE"},
-                {"id": "supply_chain", "name": "Global Supply Chain & Logistics", "status": "AVAILABLE"},
-                {"id": "cyber", "name": "Cyber-Resilience & Attack Blast Radius", "status": "AVAILABLE"},
-            ]
-            self._send_json({"domains": domains})
-
-        elif parsed.path == "/api/v1/simulate":
-            # Delegate to query-parameter simulation for quick web UI queries
-            query = urllib.parse.parse_qs(parsed.query)
-            traffic = float(query.get("traffic", [1.2])[0])
-            horizon = int(query.get("horizon", [6])[0])
-            gw_inst = float(query.get("gw", [8.0])[0])
-            db_factor = float(query.get("db", [1.5])[0])
-
-            state, dynamics = build_cloud_systems_scenario(traffic_scale=traffic)
-
-            action_gw = Action(
-                name=f"Autoscale Gateway ({int(gw_inst)} instances)",
-                intervention_type=InterventionType.PARAM_TUNE,
-                target_entity="api_gateway",
-                parameters={"active_instances": gw_inst},
-                cost=250.0,
-            )
-
-            action_db = Action(
-                name=f"Scale DB Pool ({db_factor:.2f}x)",
-                intervention_type=InterventionType.SCALE,
-                target_entity="database_cluster",
-                parameters={"metric": "capacity", "factor": db_factor},
-                cost=120.0,
-            )
-
-            planner = CounterfactualMCTS(dynamics, [action_gw, action_db], horizon=horizon)
-            b_traj = planner.simulate_trajectory(state, [Action.no_op()] * horizon, name="Status Quo (No Action)")
-            t_gw = planner.simulate_trajectory(state, [action_gw] + [Action.no_op()] * (horizon - 1), name=action_gw.name)
-            t_db = planner.simulate_trajectory(state, [action_db] + [Action.no_op()] * (horizon - 1), name=action_db.name)
-            t_both = planner.simulate_trajectory(state, [action_gw, action_db] + [Action.no_op()] * (horizon - 2), name="Dual Scaling (Gateway + DB)")
-            t_both.total_cost = action_gw.cost + action_db.cost
-
-            candidates = [b_traj, t_gw, t_db, t_both]
-            best = next((t for t in candidates[1:] if t.is_valid), None)
-            rec = f"Deploy '{best.name}' ($ {best.total_cost:.2f}). Baseline and partial actions collapse from downstream resource starvation." if best else "All interventions breached SLA thresholds."
-
-            response_data = {
-                "horizon": horizon,
-                "recommendation": rec,
-                "timelines": []
-            }
-
-            for t in candidates:
-                fs = t.final_state
-                gw_lat = fs.get_metric("api_gateway", "latency_ms", 0.0) if fs else 0.0
-                db_pool = (fs.get_metric("database_cluster", "connection_pool_usage", 0.0) * 100) if fs else 0.0
-                err_rate = (fs.get_metric("api_gateway", "error_rate", 0.0) * 100) if fs else 0.0
-
-                response_data["timelines"].append({
-                    "name": t.name,
-                    "is_valid": t.is_valid,
-                    "critical_violations": len([v for v in t.all_violations if v[1].severity == "CRITICAL"]),
-                    "total_cost": t.total_cost,
-                    "metrics": {
-                        "gw_latency": f"{gw_lat:.1f}",
-                        "db_pool": f"{db_pool:.1f}",
-                        "error_rate": f"{err_rate:.2f}"
-                    }
-                })
-
-            self._send_json(response_data)
-
-        else:
-            self.send_response(404)
-            self.end_headers()
-
-    def do_POST(self):
-        parsed = urllib.parse.urlparse(self.path)
-        content_length = int(self.headers.get("Content-Length", 0))
-        body = self.rfile.read(content_length)
-
-        try:
-            payload = json.loads(body.decode("utf-8")) if body else {}
-        except Exception as e:
-            self.send_response(400)
-            self._send_json({"error": f"Invalid JSON payload: {str(e)}"})
             return
 
+        elif parsed.path == "/api/v1/pr-audits":
+            auth = self._authenticate()
+            if not auth:
+                return
+            tenant, _ = auth
+            # Tenancy Isolation: Only return audits for authenticated tenant
+            audits = saas_platform.db.list_pr_audits_for_tenant(tenant.id)
+            self._send_json({
+                "tenant_id": tenant.id,
+                "audits_count": len(audits),
+                "audits": [
+                    {
+                        "id": a.id,
+                        "repo": a.repo,
+                        "pr_number": a.pr_number,
+                        "commit_sha": a.commit_sha,
+                        "verdict": a.verdict,
+                        "critical_breaches": a.critical_breaches,
+                        "recommended_fix": a.recommended_fix,
+                        "audit_summary": a.audit_summary,
+                    }
+                    for a in audits
+                ]
+            })
+            return
+
+        elif parsed.path == "/api/v1/auth/keys":
+            auth = self._authenticate(required_scope="admin")
+            if not auth:
+                return
+            tenant, _ = auth
+            keys = saas_platform.list_api_keys(tenant.id)
+            self._send_json({"tenant_id": tenant.id, "keys": keys})
+            return
+
+        else:
+            self._send_error(status=404, title="Not Found", detail=f"No route found for GET {parsed.path}")
+
+    # --------------------------------------------------------------------------
+    # POST Handlers
+    # --------------------------------------------------------------------------
+    def do_POST(self) -> None:
+        parsed = urllib.parse.urlparse(self.path)
+
+        # 1. Public Signup (Enforces FREE tier entitlement)
         if parsed.path == "/api/v1/tenants":
-            name = payload.get("name", "New Organization")
-            tier = payload.get("tier", "PRO")
-            tenant, raw_token = saas_platform.create_tenant(name=name, tier=tier)
+            payload = self._read_json_payload()
+            if payload is None:
+                return
+
+            name = payload.get("name", "").strip() or "New Organization"
+            # Security Control: Public signups cannot self-assign PRO or ENTERPRISE
+            tenant, raw_token = saas_platform.create_tenant(name=name, tier="FREE", is_admin_request=False)
             self._send_json({
                 "tenant_id": tenant.id,
                 "name": tenant.name,
                 "tier": tenant.tier.value,
                 "api_key": raw_token,
                 "status": "PROVISIONED",
+                "notice": "Self-service registration assigned to FREE tier (100 simulations/month).",
             }, status=201)
+            return
 
+        # 2. Key Lifecycle: Mint Key (Requires authenticated admin)
         elif parsed.path == "/api/v1/auth/keys":
-            tenant = self._get_authenticated_tenant()
-            from omnisim.saas.models import APIKey
+            auth = self._authenticate(required_scope="admin")
+            if not auth:
+                return
+            tenant, _ = auth
+            payload = self._read_json_payload()
+            if payload is None:
+                return
+
             key_name = payload.get("name", "CI Deployment Key")
-            api_key, raw_token = APIKey.generate(tenant.id, name=key_name)
-            saas_platform.api_keys[api_key.key_hash] = api_key
+            scopes = payload.get("scopes", ["simulations:write", "telemetry:write", "webhooks:write"])
+            expires_days = payload.get("expires_in_days")
+
+            api_key, raw_token = saas_platform.create_api_key(
+                tenant_id=tenant.id,
+                name=key_name,
+                scopes=scopes,
+                expires_in_days=int(expires_days) if expires_days else None,
+            )
             self._send_json({
                 "tenant_id": tenant.id,
                 "key_name": key_name,
                 "prefix": api_key.prefix,
                 "token": raw_token,
                 "scopes": api_key.scopes,
+                "notice": "Store this token securely; it cannot be retrieved again.",
             }, status=201)
+            return
 
+        # 3. Simulations Dispatch (Requires authenticated tenant with simulations:write)
         elif parsed.path == "/api/v1/simulations":
-            tenant = self._get_authenticated_tenant()
+            auth = self._authenticate(required_scope="simulations:write")
+            if not auth:
+                return
+            tenant, _ = auth
+            payload = self._read_json_payload()
+            if payload is None:
+                return
+
             domain = payload.get("domain", "systems")
-            horizon = int(payload.get("horizon", 6))
-            traffic_scale = float(payload.get("traffic_scale", 1.2))
+            try:
+                horizon = int(payload.get("horizon", 6))
+                traffic_scale = float(payload.get("traffic_scale", 1.2))
+            except (ValueError, TypeError):
+                self._send_error(status=400, title="Bad Request", detail="Invalid horizon or traffic_scale format.")
+                return
+
             try:
                 result = saas_platform.execute_simulation(
                     tenant=tenant,
@@ -229,21 +312,78 @@ class OmniSimAPIServer(http.server.SimpleHTTPRequestHandler):
                     traffic_scale=traffic_scale,
                 )
                 self._send_json(result)
+            except ValueError as ve:
+                self._send_error(status=400, title="Bad Request", detail=str(ve))
             except PermissionError as pe:
-                self._send_json({"error": str(pe)}, status=429)
+                self._send_error(status=429, title="Quota Exceeded", detail=str(pe))
+            return
 
+        # 4. GitHub PR Webhook with Signature & Replay Verification
         elif parsed.path == "/api/v1/webhooks/github":
-            tenant = self._get_authenticated_tenant()
-            audit_result = saas_platform.process_github_pr_webhook(tenant, payload)
-            self._send_json(audit_result)
+            # Webhook signature verification
+            webhook_secret = os.environ.get("OMNISIM_WEBHOOK_SECRET", "")
+            content_length = int(self.headers.get("Content-Length", 0))
+            raw_body = self.rfile.read(content_length)
 
+            if webhook_secret:
+                sig_header = self.headers.get("X-Hub-Signature-256", "")
+                if not OmniSimSaaSPlatform.verify_github_webhook_signature(webhook_secret, raw_body, sig_header):
+                    self._send_error(
+                        status=401,
+                        title="Unauthorized",
+                        detail="Invalid or missing X-Hub-Signature-256 webhook signature.",
+                    )
+                    return
+
+            try:
+                payload = json.loads(raw_body.decode("utf-8"))
+            except Exception as e:
+                self._send_error(status=400, title="Bad Request", detail=f"Malformed webhook JSON: {str(e)}")
+                return
+
+            delivery_id = self.headers.get("X-GitHub-Delivery")
+
+            # Route to tenant (via Authorization or default enterprise in demo mode)
+            auth_hdr = self.headers.get("Authorization", "")
+            auth_res = saas_platform.authenticate_token(auth_hdr)
+            tenant = auth_res[0] if auth_res else (saas_platform.db.get_tenant("org_enterprise_acme") if saas_platform.enable_demo_mode else None)
+
+            if not tenant:
+                self._send_error(status=401, title="Unauthorized", detail="Missing tenant authentication for webhook integration.")
+                return
+
+            try:
+                audit_result = saas_platform.process_github_pr_webhook(tenant, payload, delivery_id=delivery_id)
+                self._send_json(audit_result)
+            except ValueError as ve:
+                # Replay attack / duplicate delivery ID
+                self._send_error(status=409, title="Conflict", detail=str(ve))
+            return
+
+        # 5. Ingest Telemetry
         elif parsed.path == "/api/v1/ingest/telemetry":
-            tenant = self._get_authenticated_tenant()
+            auth = self._authenticate(required_scope="telemetry:write")
+            if not auth:
+                return
+            tenant, _ = auth
+            payload = self._read_json_payload()
+            if payload is None:
+                return
+
             metrics = payload.get("metrics", [])
             telemetry_res = saas_platform.ingest_telemetry_stream(tenant, metrics)
             self._send_json(telemetry_res)
+            return
 
+        # 6. Ingest Kubernetes Manifests
         elif parsed.path == "/api/v1/ingest/k8s":
+            auth = self._authenticate(required_scope="simulations:write")
+            if not auth:
+                return
+            payload = self._read_json_payload()
+            if payload is None:
+                return
+
             manifests = payload.get("manifests", [])
             state = KubernetesManifestIngester.parse_manifests(manifests)
             self._send_json({
@@ -253,12 +393,36 @@ class OmniSimAPIServer(http.server.SimpleHTTPRequestHandler):
                 "relations_wired": len(state.relations),
                 "entity_ids": list(state.entities.keys()),
             })
+            return
 
+        # 7. Batch Simulation
         elif parsed.path == "/api/v1/simulate/batch":
-            # High-throughput batch Monte Carlo simulation endpoint
+            auth = self._authenticate(required_scope="simulations:write")
+            if not auth:
+                return
+            payload = self._read_json_payload()
+            if payload is None:
+                return
+
             domain = payload.get("domain", "systems")
-            num_rollouts = int(payload.get("num_rollouts", 100))
-            horizon = int(payload.get("horizon", 6))
+            if domain not in VALID_DOMAINS:
+                self._send_error(status=400, title="Bad Request", detail=f"Invalid domain '{domain}'. Must be one of {sorted(list(VALID_DOMAINS))}")
+                return
+
+            try:
+                num_rollouts = int(payload.get("num_rollouts", 100))
+                horizon = int(payload.get("horizon", 6))
+            except (ValueError, TypeError):
+                self._send_error(status=400, title="Bad Request", detail="Invalid rollouts or horizon format.")
+                return
+
+            # Enforce compute boundaries
+            if num_rollouts < 1 or num_rollouts > 1000:
+                self._send_error(status=400, title="Bad Request", detail="num_rollouts must be between 1 and 1000.")
+                return
+            if horizon < 1 or horizon > 20:
+                self._send_error(status=400, title="Bad Request", detail="horizon must be between 1 and 20.")
+                return
 
             if domain == "systems":
                 state, dynamics = build_cloud_systems_scenario(traffic_scale=1.2)
@@ -289,22 +453,41 @@ class OmniSimAPIServer(http.server.SimpleHTTPRequestHandler):
                 "mean_cost": result.mean_cost,
                 "failure_distribution_by_step": result.all_violations_by_step,
             })
+            return
 
         else:
-            self.send_response(404)
-            self.end_headers()
+            self._send_error(status=404, title="Not Found", detail=f"No route found for POST {parsed.path}")
 
-    def _send_json(self, data: Dict[str, Any], status: int = 200) -> None:
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.end_headers()
-        self.wfile.write(json.dumps(data, indent=2).encode("utf-8"))
+    # --------------------------------------------------------------------------
+    # DELETE Handlers (Key Revocation)
+    # --------------------------------------------------------------------------
+    def do_DELETE(self) -> None:
+        parsed = urllib.parse.urlparse(self.path)
+        if parsed.path.startswith("/api/v1/auth/keys/"):
+            auth = self._authenticate(required_scope="admin")
+            if not auth:
+                return
+            tenant, _ = auth
+            key_identifier = parsed.path[len("/api/v1/auth/keys/"):]
+            revoked = saas_platform.revoke_api_key(tenant.id, key_identifier)
+            if revoked:
+                self._send_json({"status": "REVOKED", "key_identifier": key_identifier})
+            else:
+                self._send_error(status=404, title="Not Found", detail=f"API key '{key_identifier}' not found for tenant.")
+            return
+
+        self._send_error(status=404, title="Not Found", detail=f"No route found for DELETE {parsed.path}")
 
 
-def run_api_server(port: int = DEFAULT_PORT) -> None:
-    print(f"[ONLINE] OmniSim Enterprise API Gateway online at http://localhost:{port}")
-    with socketserver.TCPServer(("", port), OmniSimAPIServer) as httpd:
+def run_api_server(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT, demo_mode: bool = False) -> None:
+    global saas_platform
+    if demo_mode:
+        saas_platform.enable_demo_mode = True
+        saas_platform._bootstrap_demo_accounts()
+
+    print(f"[ONLINE] OmniSim Enterprise API Gateway v{SERVER_VERSION}")
+    print(f"[SECURITY] Bound to {host}:{port} | Demo Mode: {saas_platform.enable_demo_mode}")
+    with socketserver.TCPServer((host, port), OmniSimAPIServer) as httpd:
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
@@ -312,4 +495,9 @@ def run_api_server(port: int = DEFAULT_PORT) -> None:
 
 
 if __name__ == "__main__":
-    run_api_server()
+    parser = argparse.ArgumentParser(description="OmniSim Enterprise API Server")
+    parser.add_argument("--host", default=DEFAULT_HOST, help="Interface to bind (default: 127.0.0.1)")
+    parser.add_argument("--port", type=int, default=DEFAULT_PORT, help="Port (default: 8088)")
+    parser.add_argument("--demo", action="store_true", help="Enable local demo mode with mock accounts")
+    args = parser.parse_args()
+    run_api_server(host=args.host, port=args.port, demo_mode=args.demo)

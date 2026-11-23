@@ -20,7 +20,6 @@ from omnisim.ingest.k8s import KubernetesManifestIngester
 from omnisim.ingest.terraform import TerraformIngester
 from omnisim.models.dynamics import WorldDynamicsModel
 from omnisim.models.search import CounterfactualMCTS
-from omnisim.server import run_api_server
 
 
 def run_simulation_cmd(domain: str, horizon: int) -> None:
@@ -249,6 +248,7 @@ def main(argv: list[str] | None = None) -> None:
         argv = ["simulate"] + argv
 
     parser = argparse.ArgumentParser(description="OmniSim: Universal Counterfactual Simulation Engine")
+    parser.add_argument("-v", "--version", action="version", version="omnisim-engine 1.0.0")
     subparsers = parser.add_subparsers(dest="command", help="Sub-commands")
 
     # tf-zero-day command
@@ -269,8 +269,10 @@ def main(argv: list[str] | None = None) -> None:
     sim_parser.add_argument("--horizon", type=int, default=6)
 
     # serve command
-    serve_parser = subparsers.add_parser("serve", help="Launch REST & Web Visualizer Gateway")
-    serve_parser.add_argument("--port", type=int, default=8088)
+    serve_parser = subparsers.add_parser("serve", help="Launch Enterprise REST & Headless Agent Gateway")
+    serve_parser.add_argument("--host", default="127.0.0.1", help="Host interface to bind (default: 127.0.0.1)")
+    serve_parser.add_argument("--port", type=int, default=8088, help="Port to listen on (default: 8088)")
+    serve_parser.add_argument("--demo", action="store_true", help="Enable local demo mode with mock accounts")
 
     # benchmark command
     bench_parser = subparsers.add_parser("benchmark", help="Benchmark parallel stochastic rollouts")
@@ -365,7 +367,12 @@ def main(argv: list[str] | None = None) -> None:
                 hcl_content = f.read()
         run_terraform_audit_cmd(hcl_content)
     elif args.command == "serve":
-        run_api_server(port=args.port)
+        from omnisim.server import run_api_server
+        run_api_server(
+            host=getattr(args, "host", "127.0.0.1"),
+            port=args.port,
+            demo_mode=getattr(args, "demo", False),
+        )
     elif args.command == "benchmark":
         run_benchmark_cmd(args.domain, args.rollouts, args.horizon)
     elif args.command == "simulate" or args.command is None:
