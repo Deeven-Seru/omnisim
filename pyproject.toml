@@ -1,6 +1,6 @@
 [project]
 name = "omnisim"
-version = "0.1.0"
+version = "1.0.0"
 description = "OmniSim: The Universal Counterfactual Simulation Engine - Beyond Probabilistic Text Generation to Action-Conditioned World Simulation"
 readme = "README.md"
 authors = [
