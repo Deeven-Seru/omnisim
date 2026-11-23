@@ -13,13 +13,18 @@ import re
 from typing import Any, Dict, List, Optional, Tuple
 from omnisim.core.state import Entity, Invariant, UniversalState
 
-# AWS RDS PostgreSQL default max_connections formula:
-# LEAST({DBInstanceClassMemory/9531392}, 5000)
+# AWS RDS PostgreSQL & MySQL default max_connections formulas:
 RDS_INSTANCE_SPECS = {
+    "db.t2.micro": {"ram_mb": 1024, "max_connections": 112, "base_iops": 1000},
+    "db.t2.small": {"ram_mb": 2048, "max_connections": 225, "base_iops": 1500},
+    "db.t2.medium": {"ram_mb": 4096, "max_connections": 412, "base_iops": 2000},
     "db.t3.micro": {"ram_mb": 1024, "max_connections": 112, "base_iops": 1000},
     "db.t3.small": {"ram_mb": 2048, "max_connections": 225, "base_iops": 1500},
     "db.t3.medium": {"ram_mb": 4096, "max_connections": 412, "base_iops": 2000},
     "db.t3.large": {"ram_mb": 8192, "max_connections": 824, "base_iops": 3000},
+    "db.t4g.micro": {"ram_mb": 1024, "max_connections": 112, "base_iops": 1000},
+    "db.t4g.small": {"ram_mb": 2048, "max_connections": 225, "base_iops": 1500},
+    "db.t4g.medium": {"ram_mb": 4096, "max_connections": 412, "base_iops": 2000},
     "db.r6g.large": {"ram_mb": 16384, "max_connections": 1365, "base_iops": 6000},
     "db.r6g.xlarge": {"ram_mb": 32768, "max_connections": 2730, "base_iops": 12000},
 }
