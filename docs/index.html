@@ -3,26 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OmniSim | The Foundational Platform for Infrastructure Survivability</title>
-    <meta name="description" content="OmniSim is the enterprise world model for cloud infrastructure. Causal ontology, action-conditioned counterfactual simulation, and autonomous invariant enforcement.">
+    <title>OmniSim | Foundational Software for Infrastructure Survivability</title>
+    <meta name="description" content="OmniSim delivers foundational software for mission-critical cloud infrastructure. Causal ontology, action-conditioned simulation, and autonomous invariant defense.">
     <link rel="icon" type="image/svg+xml" href="assets/omnisim-icon.svg">
     <style>
         :root {
             --bg-base: #000000;
             --bg-surface: #060608;
-            --bg-elevated: #0D0D12;
+            --bg-elevated: #0C0C10;
             --border-subtle: rgba(255, 255, 255, 0.08);
             --border-light: rgba(255, 255, 255, 0.16);
             --border-active: rgba(255, 255, 255, 0.45);
             --text-stark: #FFFFFF;
-            --text-body: #9595A2;
-            --text-muted: #545460;
+            --text-body: #92929E;
+            --text-muted: #50505C;
             --cyan: #00F0FF;
-            --cyan-glow: rgba(0, 240, 255, 0.25);
-            --cyan-dim: rgba(0, 240, 255, 0.10);
+            --cyan-glow: rgba(0, 240, 255, 0.22);
+            --cyan-dim: rgba(0, 240, 255, 0.08);
             --amber: #E5B942;
-            --danger: #FF3B30;
-            --danger-glow: rgba(255, 59, 48, 0.25);
+            --amber-dim: rgba(229, 185, 66, 0.12);
+            --danger: #FF3344;
+            --danger-glow: rgba(255, 51, 68, 0.22);
             --font-editorial: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, sans-serif;
             --font-mono: "SF Mono", "Menlo", "Monaco", "Consolas", monospace;
         }
@@ -44,7 +45,7 @@
             position: relative;
         }
 
-        /* Ambient Dynamic Canvas Background */
+        /* 60FPS Ambient Living Particle Topology Canvas */
         #ontology-canvas {
             position: fixed;
             top: 0;
@@ -64,7 +65,7 @@
             z-index: 1;
         }
 
-        /* Scanline Overlay Effect */
+        /* Subtle CRT / Grid Overlay */
         body::before {
             content: "";
             position: fixed;
@@ -72,21 +73,21 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.01), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.01));
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.20) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.01), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.01));
             background-size: 100% 3px, 6px 100%;
             pointer-events: none;
             z-index: 999;
-            opacity: 0.35;
+            opacity: 0.3;
         }
 
-        /* Top Technical Utility Bar */
+        /* Palantir Utility Bar */
         .utility-banner {
             border-bottom: 1px solid var(--border-subtle);
             font-family: var(--font-mono);
             font-size: 11px;
             letter-spacing: 2px;
             text-transform: uppercase;
-            padding: 10px 0;
+            padding: 12px 0;
             display: flex;
             justify-content: space-between;
             color: var(--text-muted);
@@ -136,7 +137,6 @@
             font-family: var(--font-mono);
             font-weight: 800;
             font-size: 14px;
-            letter-spacing: -0.5px;
             position: relative;
             overflow: hidden;
         }
@@ -202,8 +202,6 @@
             text-transform: uppercase;
             text-decoration: none;
             transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            overflow: hidden;
         }
         .btn-action:hover {
             border-color: var(--text-stark);
@@ -212,12 +210,28 @@
             box-shadow: 0 0 24px rgba(255, 255, 255, 0.25);
         }
 
-        /* Hero */
+        /* Hero: Cinematic Statement */
         .hero {
             padding: 140px 0 110px;
             border-bottom: 1px solid var(--border-subtle);
             position: relative;
         }
+        .laser-scanner {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            animation: scan-horizontal 6s infinite ease-in-out;
+            pointer-events: none;
+        }
+        @keyframes scan-horizontal {
+            0% { transform: scaleX(0.2) translateX(-100%); opacity: 0; }
+            50% { transform: scaleX(1) translateX(0); opacity: 1; }
+            100% { transform: scaleX(0.2) translateX(100%); opacity: 0; }
+        }
+
         .hero-kicker {
             font-family: var(--font-mono);
             font-size: 12px;
@@ -261,7 +275,7 @@
         .hero-statement {
             font-size: 21px;
             color: var(--text-body);
-            max-width: 820px;
+            max-width: 840px;
             line-height: 1.6;
             margin-bottom: 56px;
             font-weight: 400;
@@ -287,7 +301,7 @@
         .btn-primary-stark {
             background: var(--text-stark);
             color: #000;
-            padding: 16px 36px;
+            padding: 16px 38px;
             font-family: var(--font-mono);
             font-size: 12px;
             font-weight: 800;
@@ -303,45 +317,56 @@
             box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
         }
 
-        .command-badge {
+        .btn-outline-stark {
+            border: 1px solid var(--border-light);
             background: var(--bg-surface);
-            border: 1px solid var(--border-subtle);
-            padding: 14px 24px;
+            color: var(--text-stark);
+            padding: 16px 36px;
             font-family: var(--font-mono);
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            cursor: pointer;
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-decoration: none;
             transition: all 0.25s;
         }
-        .command-badge:hover {
+        .btn-outline-stark:hover {
             border-color: var(--cyan);
+            color: var(--cyan);
             box-shadow: 0 0 20px var(--cyan-dim);
         }
 
-        /* Laser Sweep Scanner Line */
-        .laser-scanner {
-            position: absolute;
-            left: 0;
-            bottom: 0;
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
-            animation: scan-horizontal 6s infinite ease-in-out;
-            pointer-events: none;
+        /* The Thesis: Beyond Autoregressive Generation */
+        .thesis-section {
+            padding: 110px 0;
+            border-bottom: 1px solid var(--border-subtle);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
         }
-        @keyframes scan-horizontal {
-            0% { transform: scaleX(0.2) translateX(-100%); opacity: 0; }
-            50% { transform: scaleX(1) translateX(0); opacity: 1; }
-            100% { transform: scaleX(0.2) translateX(100%); opacity: 0; }
+        @media (max-width: 900px) { .thesis-section { grid-template-columns: 1fr; gap: 40px; } }
+        
+        .thesis-card h3 {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+        }
+        .thesis-card p {
+            font-size: 17px;
+            color: var(--text-body);
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+        .thesis-contrast {
+            padding-left: 32px;
+            border-left: 1px solid var(--border-subtle);
         }
 
-        /* Palantir Interactive Canvas & Graph */
-        .canvas-section {
-            padding: 120px 0;
+        /* The Platforms Suite: Palantir Foundry / AIP Paradigm */
+        .platforms-section {
+            padding: 130px 0;
             border-bottom: 1px solid var(--border-subtle);
-            position: relative;
         }
         .section-tag {
             font-family: var(--font-mono);
@@ -353,7 +378,7 @@
             display: block;
         }
         .section-title {
-            font-size: 46px;
+            font-size: 48px;
             font-weight: 800;
             letter-spacing: -1.5px;
             text-transform: uppercase;
@@ -362,175 +387,6 @@
             max-width: 900px;
         }
 
-        .canvas-container {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-subtle);
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
-        }
-
-        /* Corner crosshairs */
-        .canvas-container::before, .canvas-container::after {
-            content: "+";
-            position: absolute;
-            font-family: var(--font-mono);
-            font-size: 14px;
-            color: var(--cyan);
-            z-index: 10;
-        }
-        .canvas-container::before { top: 8px; left: 10px; }
-        .canvas-container::after { bottom: 8px; right: 10px; }
-
-        .canvas-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-subtle);
-            padding: 16px 28px;
-            background: #020203;
-        }
-        .canvas-tabs {
-            display: flex;
-            gap: 12px;
-        }
-        .canvas-tab {
-            background: transparent;
-            border: 1px solid var(--border-subtle);
-            color: var(--text-muted);
-            padding: 8px 20px;
-            font-family: var(--font-mono);
-            font-size: 11px;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-        }
-        .canvas-tab.active {
-            border-color: var(--cyan);
-            color: var(--cyan);
-            background: rgba(0, 240, 255, 0.05);
-            box-shadow: 0 0 16px var(--cyan-dim);
-        }
-
-        .canvas-content-grid {
-            display: grid;
-            grid-template-columns: 420px 1fr;
-        }
-        @media (max-width: 980px) { .canvas-content-grid { grid-template-columns: 1fr; } }
-
-        .canvas-sidebar {
-            padding: 36px;
-            border-right: 1px solid var(--border-subtle);
-            background: var(--bg-surface);
-        }
-        .canvas-viewport {
-            padding: 36px;
-            background: #020204;
-            min-height: 520px;
-            position: relative;
-        }
-
-        .control-row { margin-bottom: 28px; }
-        .control-label {
-            font-family: var(--font-mono);
-            font-size: 11px;
-            letter-spacing: 2px;
-            color: var(--text-body);
-            text-transform: uppercase;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        /* Oscilloscope Live Simulation Waveform Canvas */
-        .chart-box {
-            border: 1px solid var(--border-subtle);
-            background: #000;
-            padding: 20px;
-            margin-bottom: 24px;
-            position: relative;
-        }
-        .chart-hud-label {
-            position: absolute;
-            top: 14px;
-            left: 20px;
-            font-family: var(--font-mono);
-            font-size: 10px;
-            letter-spacing: 1.5px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-        #waveform-canvas {
-            width: 100%;
-            height: 180px;
-            display: block;
-        }
-
-        /* Animated Verdict Trajectory Cards */
-        .verdict-card {
-            border: 1px solid var(--border-subtle);
-            padding: 24px;
-            margin-bottom: 18px;
-            background: var(--bg-surface);
-            position: relative;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            animation: card-appear 0.4s ease-out;
-        }
-        @keyframes card-appear {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .verdict-card:hover {
-            border-color: var(--border-light);
-            background: var(--bg-elevated);
-        }
-        .verdict-card.danger {
-            border-left: 4px solid var(--danger);
-        }
-        .verdict-card.optimal {
-            border-left: 4px solid var(--cyan);
-            background: rgba(0, 240, 255, 0.02);
-        }
-        .verdict-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: var(--font-mono);
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-        }
-        .status-pill {
-            padding: 3px 10px;
-            font-size: 10px;
-            font-family: var(--font-mono);
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        }
-        .status-pill.red { background: rgba(255, 59, 48, 0.12); color: var(--danger); border: 1px solid var(--danger); }
-        .status-pill.cyan { background: var(--cyan-glow); color: var(--cyan); border: 1px solid var(--cyan); }
-
-        .metric-matrix {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid var(--border-subtle);
-            font-family: var(--font-mono);
-            font-size: 11px;
-        }
-        .matrix-label { color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
-        .matrix-val { font-size: 15px; font-weight: 700; color: var(--text-stark); }
-
-        /* Platforms Grid */
-        .platforms-section {
-            padding: 120px 0;
-            border-bottom: 1px solid var(--border-subtle);
-        }
         .platform-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -606,9 +462,180 @@
             gap: 12px;
         }
 
-        /* Benchmarks Records */
+        /* The Mission Control Canvas (Visual Operations) */
+        .canvas-section {
+            padding: 130px 0;
+            border-bottom: 1px solid var(--border-subtle);
+            position: relative;
+        }
+        .canvas-container {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.7);
+        }
+        .canvas-container::before, .canvas-container::after {
+            content: "+";
+            position: absolute;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--cyan);
+            z-index: 10;
+        }
+        .canvas-container::before { top: 8px; left: 10px; }
+        .canvas-container::after { bottom: 8px; right: 10px; }
+
+        .canvas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 18px 28px;
+            background: #020203;
+        }
+        .canvas-tabs {
+            display: flex;
+            gap: 12px;
+        }
+        .canvas-tab {
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            padding: 9px 22px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .canvas-tab.active {
+            border-color: var(--cyan);
+            color: var(--cyan);
+            background: rgba(0, 240, 255, 0.05);
+            box-shadow: 0 0 16px var(--cyan-dim);
+        }
+
+        .canvas-content-grid {
+            display: grid;
+            grid-template-columns: 440px 1fr;
+        }
+        @media (max-width: 980px) { .canvas-content-grid { grid-template-columns: 1fr; } }
+
+        .canvas-sidebar {
+            padding: 36px;
+            border-right: 1px solid var(--border-subtle);
+            background: var(--bg-surface);
+        }
+        .canvas-viewport {
+            padding: 36px;
+            background: #020204;
+            min-height: 520px;
+            position: relative;
+        }
+
+        .control-row { margin-bottom: 28px; }
+        .control-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--text-body);
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--cyan);
+        }
+
+        /* Oscilloscope Waveform Display */
+        .chart-box {
+            border: 1px solid var(--border-subtle);
+            background: #000;
+            padding: 20px;
+            margin-bottom: 24px;
+            position: relative;
+        }
+        .chart-hud-label {
+            position: absolute;
+            top: 14px;
+            left: 20px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        #waveform-canvas {
+            width: 100%;
+            height: 180px;
+            display: block;
+        }
+
+        /* Visual Operational Cards */
+        .verdict-card {
+            border: 1px solid var(--border-subtle);
+            padding: 24px;
+            margin-bottom: 18px;
+            background: var(--bg-surface);
+            position: relative;
+            transition: all 0.3s;
+            animation: card-appear 0.4s ease-out;
+        }
+        @keyframes card-appear {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .verdict-card:hover {
+            border-color: var(--border-light);
+            background: var(--bg-elevated);
+        }
+        .verdict-card.danger {
+            border-left: 4px solid var(--danger);
+        }
+        .verdict-card.optimal {
+            border-left: 4px solid var(--cyan);
+            background: rgba(0, 240, 255, 0.02);
+        }
+        .verdict-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+        .status-pill {
+            padding: 3px 10px;
+            font-size: 10px;
+            font-family: var(--font-mono);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        .status-pill.red { background: rgba(255, 59, 48, 0.12); color: var(--danger); border: 1px solid var(--danger); }
+        .status-pill.cyan { background: var(--cyan-glow); color: var(--cyan); border: 1px solid var(--cyan); }
+
+        .metric-matrix {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-subtle);
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+        .matrix-label { color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+        .matrix-val { font-size: 15px; font-weight: 700; color: var(--text-stark); }
+
+        /* Empirical Operational Records (Benchmarks) */
         .records-section {
-            padding: 120px 0;
+            padding: 130px 0;
             border-bottom: 1px solid var(--border-subtle);
         }
         .records-grid {
@@ -653,56 +680,93 @@
             line-height: 1.7;
         }
 
-        /* CI/CD Sentry Gatekeeper */
+        /* Continuous Sentry Gatekeeper (Visual Interface) */
         .sentry-section {
-            padding: 120px 0;
+            padding: 130px 0;
             border-bottom: 1px solid var(--border-subtle);
         }
-        .sentry-container {
+        .sentry-interface {
             border: 1px solid var(--border-subtle);
-            background: #000;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            background: #040406;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
         }
-        .sentry-bar {
+        .sentry-header-row {
             display: flex;
             justify-content: space-between;
-            padding: 14px 24px;
+            align-items: center;
+            padding: 16px 28px;
             border-bottom: 1px solid var(--border-subtle);
+            background: #020203;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .sentry-view-content {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 28px;
+        }
+        @media (max-width: 900px) { .sentry-view-content { grid-template-columns: 1fr; } }
+
+        .pipeline-step {
+            border: 1px solid var(--border-subtle);
+            padding: 28px;
+            background: var(--bg-surface);
+            position: relative;
+        }
+        .pipeline-tag {
             font-family: var(--font-mono);
             font-size: 11px;
             letter-spacing: 2px;
             color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+        .pipeline-heading {
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        .pipeline-sub {
+            font-size: 13px;
+            color: var(--text-body);
+            line-height: 1.6;
+        }
+        .pipeline-status {
+            margin-top: 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
         }
-        .sentry-code {
-            padding: 32px;
-            font-family: var(--font-mono);
-            font-size: 13px;
-            line-height: 1.8;
-            color: var(--text-stark);
-            overflow-x: auto;
-        }
 
-        /* Manifesto */
+        /* Philosophical Manifesto */
         .manifesto-section {
-            padding: 150px 0;
+            padding: 160px 0;
             border-bottom: 1px solid var(--border-subtle);
             text-align: center;
             position: relative;
         }
         .manifesto-quote {
-            font-size: 44px;
+            font-size: 46px;
             font-weight: 800;
             letter-spacing: -1.5px;
             text-transform: uppercase;
-            max-width: 960px;
+            max-width: 1000px;
             margin: 0 auto 36px;
             line-height: 1.2;
         }
         .manifesto-sub {
             font-size: 18px;
             color: var(--text-body);
-            max-width: 680px;
+            max-width: 720px;
             margin: 0 auto 48px;
             line-height: 1.7;
         }
@@ -733,7 +797,7 @@
     </style>
 </head>
 <body>
-    <!-- 60FPS Living Ontology Causal Particle Mesh Canvas -->
+    <!-- 60FPS Ambient Living Particle Topology Mesh Canvas -->
     <canvas id="ontology-canvas"></canvas>
 
     <div class="container">
@@ -746,9 +810,9 @@
                 <span>CORE VERSION // v1.0.0</span>
             </div>
             <div>
-                <span>REGISTRY // PYPI: OMNISIM-ENGINE</span>
+                <span>ENTERPRISE ONTOLOGY ENGINE</span>
                 <span style="color: var(--border-light); margin: 0 12px;">|</span>
-                <span>ACTION // DEEVEN-SERU/OMNISIM@V1</span>
+                <span>ACTION-CONDITIONED VERIFICATION</span>
             </div>
         </div>
 
@@ -762,10 +826,10 @@
                 <li class="nav-item"><a href="#platforms">Platforms</a></li>
                 <li class="nav-item"><a href="#canvas">Mission Control</a></li>
                 <li class="nav-item"><a href="#records">Verification</a></li>
-                <li class="nav-item"><a href="#sentry">CI/CD Sentry</a></li>
-                <li class="nav-item"><a href="https://pypi.org/project/omnisim-engine/" target="_blank">PyPI</a></li>
+                <li class="nav-item"><a href="#sentry">Autonomous Defense</a></li>
+                <li class="nav-item"><a href="https://pypi.org/project/omnisim-engine/" target="_blank">Engine Distribution</a></li>
             </ul>
-            <a href="https://github.com/Deeven-Seru/omnisim" target="_blank" class="btn-action">Deploy Action</a>
+            <a href="https://github.com/Deeven-Seru/omnisim" target="_blank" class="btn-action">Deploy Platform</a>
         </nav>
 
         <!-- Hero -->
@@ -776,16 +840,34 @@
                 Deterministic certainty <span>in non-deterministic systems.</span>
             </h1>
             <p class="hero-statement">
-                Software infrastructure is governed by physical constraints. OmniSim transforms static code and runtime topologies into a living causal world model—evaluating millions of counterfactual future states to guarantee operational survivability before changes apply.
+                Software infrastructure is governed by physical constraints. OmniSim transforms static declarations and runtime topologies into a living causal digital twin—evaluating millions of counterfactual future states to guarantee operational survivability before changes apply.
             </p>
 
             <div class="hero-cta-cluster">
                 <a href="#canvas" class="btn-primary-stark">Launch Mission Control</a>
-                <div class="command-badge" onclick="copyInstallCmd()">
-                    <span style="color: var(--cyan);">&gt;</span>
-                    <span id="cmd-text">pip install omnisim-engine</span>
-                    <span style="color: var(--text-muted); font-size: 10px; margin-left: 12px;" id="copy-status">COPY</span>
-                </div>
+                <a href="#platforms" class="btn-outline-stark">Explore Platforms Suite</a>
+            </div>
+        </section>
+
+        <!-- The Philosophical Divide -->
+        <section class="thesis-section">
+            <div class="thesis-card">
+                <h3 style="color: var(--text-muted);">The Fatal Flaw // Static Linters & Probabilistic LLMs</h3>
+                <p>
+                    Modern CI/CD pipelines rely on linters that verify syntax and large language models that guess probable code patterns. Neither models dynamic time.
+                </p>
+                <p>
+                    When an Auto Scaling Group expands from 4 to 28 instances during traffic surges, linters issue green checkmarks. They cannot perceive that 504 concurrent worker threads will collide with an underlying datastore capped at 412 connections, triggering catastrophic pool exhaustion.
+                </p>
+            </div>
+            <div class="thesis-card thesis-contrast">
+                <h3 style="color: var(--cyan);">The Solution // Action-Conditioned World Simulation</h3>
+                <p>
+                    OmniSim grounds reliability in physics. We represent infrastructure as a directed causal dependency graph with explicit hardware limits, queueing equations, and invariant boundaries.
+                </p>
+                <p>
+                    Through Counterfactual Monte Carlo Tree Search, the engine simulates time forward, testing alternative intervention futures to discover Pareto-optimal stability paths before code merges.
+                </p>
             </div>
         </section>
 
@@ -800,7 +882,7 @@
                         <div class="platform-code">PLATFORM // 01</div>
                         <div class="platform-name">OmniSim Ontology</div>
                         <div class="platform-desc">
-                            The dynamic digital twin. Compiles Terraform HCL declarations, Kubernetes manifests, and CloudWatch metrics into an interconnected physical topology graph with automated connection and hardware limit calculation.
+                            The dynamic digital twin. Compiles infrastructure declarations, container topologies, and runtime telemetry into an interconnected physical graph with automated connection and hardware limit calculation.
                         </div>
                     </div>
                     <a href="#canvas" class="platform-link">Explore Ontology &rarr;</a>
@@ -822,10 +904,10 @@
                         <div class="platform-code">PLATFORM // 03</div>
                         <div class="platform-name">OmniSim Sentry</div>
                         <div class="platform-desc">
-                            Continuous pre-execution gatekeeper. Integrates natively into GitHub Actions. Blocks pull requests that induce latency blackholes, datastore exhaustion, or cascading failure loops before merge approval.
+                            Continuous pre-execution gatekeeper. Sits natively within pipeline workflows. Blocks deployment requests that induce latency blackholes, datastore exhaustion, or cascading failure loops before merge approval.
                         </div>
                     </div>
-                    <a href="#sentry" class="platform-link">View CI Gatekeeper &rarr;</a>
+                    <a href="#sentry" class="platform-link">View Sentry Gate &rarr;</a>
                 </div>
 
                 <div class="platform-box">
@@ -833,7 +915,7 @@
                         <div class="platform-code">PLATFORM // 04</div>
                         <div class="platform-name">OmniSim Titan</div>
                         <div class="platform-desc">
-                            Autonomous code remediation synthesis. When an invariant fails, Titan bypasses human on-call fatigue by auto-generating the exact, mathematically verified Git unified diff patch directly into the PR.
+                            Autonomous infrastructure remediation synthesis. When an invariant fails, Titan bypasses human on-call fatigue by synthesizing mathematically verified architecture upgrades directly into the workflow.
                         </div>
                     </div>
                     <a href="#canvas" class="platform-link">Inspect Synthesis &rarr;</a>
@@ -841,10 +923,10 @@
             </div>
         </section>
 
-        <!-- Mission Control Canvas (Interactive Product Experience) -->
+        <!-- Mission Control Canvas (Visual Operations) -->
         <section class="canvas-section" id="canvas">
-            <span class="section-tag">Live Demonstration</span>
-            <h2 class="section-title">Mission Control Command Canvas</h2>
+            <span class="section-tag">Visual Command Canvas</span>
+            <h2 class="section-title">Mission Control Operations</h2>
 
             <div class="canvas-container">
                 <div class="canvas-header">
@@ -876,7 +958,7 @@
 
                         <div class="control-row">
                             <div class="control-label">
-                                <span>Surge Multiplier</span>
+                                <span>Surge Stress Multiplier</span>
                                 <span id="disp-traffic" style="color: var(--cyan); font-weight: 700;">1.4x</span>
                             </div>
                             <input type="range" id="sl-traffic" min="0.8" max="2.5" step="0.1" value="1.4" oninput="updateValDisplay('disp-traffic', this.value + 'x'); triggerSimUpdate();">
@@ -884,7 +966,7 @@
 
                         <div class="control-row">
                             <div class="control-label">
-                                <span>Simulation Horizon</span>
+                                <span>Simulation Horizon Depth</span>
                                 <span id="disp-horizon" style="color: var(--cyan); font-weight: 700;">6 steps</span>
                             </div>
                             <input type="range" id="sl-horizon" min="3" max="12" step="1" value="6" oninput="updateValDisplay('disp-horizon', this.value + ' steps'); triggerSimUpdate();">
@@ -930,7 +1012,7 @@
             <div class="records-grid">
                 <div class="record-card">
                     <div>
-                        <div class="record-stat" id="stat-lead-time">10 MIN</div>
+                        <div class="record-stat">10 MIN</div>
                         <div class="record-metric">Advance Outage Warning Lead Time</div>
                         <div class="record-desc">
                             Validated on 8,064 real CloudWatch telemetry points from the Numenta Anomaly Benchmark (NAB). OmniSim caught an unrecoverable 99.7% CPU outage ten minutes before production collapse.
@@ -941,10 +1023,10 @@
 
                 <div class="record-card">
                     <div>
-                        <div class="record-stat" id="stat-throughput">13.1M</div>
+                        <div class="record-stat">13.1M</div>
                         <div class="record-metric">Streaming Telemetry Points / Sec</div>
                         <div class="record-desc">
-                            Pure Python vectorized state graph evaluation. Operates without Rust or C++ bindings while achieving real-time streaming inference across multi-core compute architectures.
+                            Vectorized state graph evaluation. Operates with sub-millisecond execution times while achieving real-time streaming inference across multi-core compute architectures.
                         </div>
                     </div>
                     <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: 24px;">LATENCY: &lt; 0.65 MS P99</div>
@@ -952,7 +1034,7 @@
 
                 <div class="record-card">
                     <div>
-                        <div class="record-stat" id="stat-delta">-98.1%</div>
+                        <div class="record-stat">-98.1%</div>
                         <div class="record-metric">Cascading Latency Elimination</div>
                         <div class="record-desc">
                             Tested on Google Cloud Online Boutique (11 microservices). When payment service latency degraded to 1,800ms, OmniSim synthesized an automated circuit-breaker patch restoring frontend latency from 2,272ms to 43ms.
@@ -963,31 +1045,53 @@
             </div>
         </section>
 
-        <!-- Continuous Sentry Gatekeeper -->
+        <!-- Continuous Sentry Gatekeeper (Visual Interface) -->
         <section class="sentry-section" id="sentry">
-            <span class="section-tag">CI/CD Integration</span>
-            <h2 class="section-title">Enforce Invariants In Your Deployment Pipeline</h2>
+            <span class="section-tag">Continuous Verification Pipeline</span>
+            <h2 class="section-title">Autonomous Invariant Defense System</h2>
 
-            <div class="sentry-container">
-                <div class="sentry-bar">
-                    <span>WORKFLOW // .github/workflows/omnisim-sentry.yml</span>
-                    <span>ACTION VERSION: v1</span>
+            <div class="sentry-interface">
+                <div class="sentry-header-row">
+                    <span>GATEKEEPER SENTRY // PRE-EXECUTION SURVIVABILITY RADAR</span>
+                    <span style="color: var(--cyan);">ENFORCEMENT MODE: ACTIVE</span>
                 </div>
-                <pre class="sentry-code">name: OmniSim Pre-Flight Invariant Sentry
-on: [pull_request]
+                <div class="sentry-view-content">
+                    <div class="pipeline-step">
+                        <div class="pipeline-tag">STAGE // 01</div>
+                        <div class="pipeline-heading">Topology Ingestion</div>
+                        <div class="pipeline-sub">
+                            Parses infrastructure declarations into physical dependency relations, calculating hardware ceilings and connection pool maximums automatically.
+                        </div>
+                        <div class="pipeline-status" style="color: var(--cyan);">
+                            <span class="pulse-live"></span>
+                            <span>ONTOLOGY COMPILED</span>
+                        </div>
+                    </div>
 
-jobs:
-  verify-invariants:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v4
+                    <div class="pipeline-step">
+                        <div class="pipeline-tag">STAGE // 02</div>
+                        <div class="pipeline-heading">Counterfactual Audit</div>
+                        <div class="pipeline-sub">
+                            Rolls out action-conditioned futures against high-load stress vectors, checking relational invariants and SLA thresholds forward across time.
+                        </div>
+                        <div class="pipeline-status" style="color: var(--cyan);">
+                            <span class="pulse-live"></span>
+                            <span>SIMULATION CONVERGED</span>
+                        </div>
+                    </div>
 
-      - name: Evaluate Invariant Survivability
-        uses: Deeven-Seru/omnisim@v1
-        with:
-          terraform-dir: 'terraform'
-          fail-on-breach: 'true'</pre>
+                    <div class="pipeline-step">
+                        <div class="pipeline-tag">STAGE // 03</div>
+                        <div class="pipeline-heading">Survivability Gate</div>
+                        <div class="pipeline-sub">
+                            Enforces zero fail tolerance. Automatically rejects invariant-violating pull requests and synthesizes optimal remediation fixes.
+                        </div>
+                        <div class="pipeline-status" style="color: var(--amber);">
+                            <span class="pulse-live" style="background: var(--amber); box-shadow: 0 0 10px var(--amber);"></span>
+                            <span>GATE ENFORCED</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -1017,7 +1121,7 @@ jobs:
         </footer>
     </div>
 
-    <!-- Live Ambient Ontology Particle Graph & Oscilloscope Animation Script -->
+    <!-- Live Ambient Ontology Particle Mesh & Oscilloscope Animation Script -->
     <script>
         // ---------------------------------------------------------------------
         // 1. Ambient Living Ontology Particle Grid (60 FPS Background Canvas)
@@ -1069,7 +1173,6 @@ jobs:
                 if (p.y < 0) p.y = height;
                 if (p.y > height) p.y = 0;
 
-                // Mouse interaction
                 let dx = mouseX - p.x;
                 let dy = mouseY - p.y;
                 let dist = Math.sqrt(dx * dx + dy * dy);
@@ -1078,14 +1181,12 @@ jobs:
                     p.y -= (dy / dist) * 0.8;
                 }
 
-                // Render particle
                 let alpha = (Math.sin(p.pulse) * 0.3 + 0.7) * 0.6;
                 bgCtx.fillStyle = `rgba(0, 240, 255, ${alpha})`;
                 bgCtx.beginPath();
                 bgCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
                 bgCtx.fill();
 
-                // Connect nearest neighbors with causal graph edges
                 for (let j = i + 1; j < particles.length; j++) {
                     let p2 = particles[j];
                     let d = Math.hypot(p.x - p2.x, p.y - p2.y);
@@ -1118,7 +1219,6 @@ jobs:
 
             waveCtx.clearRect(0, 0, w, h);
 
-            // Draw grid lines
             waveCtx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
             waveCtx.lineWidth = 1;
             for (let x = 0; x < w; x += 40) {
@@ -1134,7 +1234,6 @@ jobs:
                 waveCtx.stroke();
             }
 
-            // Draw Critical 90% Invariant Threshold Ceiling Line
             const breachY = h * 0.30;
             waveCtx.strokeStyle = 'rgba(255, 59, 48, 0.6)';
             waveCtx.setLineDash([6, 6]);
@@ -1149,7 +1248,7 @@ jobs:
             waveCtx.font = '10px "SF Mono", monospace';
             waveCtx.fillText('CRITICAL INVARIANT CEILING (POOL SATURATION >= 90%)', w - 340, breachY - 8);
 
-            // Trajectory 1: Status Quo (Red shooting into breach)
+            // Trajectory 1: Status Quo (Red surge)
             waveCtx.strokeStyle = '#FF3B30';
             waveCtx.lineWidth = 2.5;
             waveCtx.shadowColor = 'rgba(255, 59, 48, 0.5)';
@@ -1176,7 +1275,6 @@ jobs:
 
             for (let x = 0; x <= w; x += 4) {
                 let progress = x / w;
-                // Exponential decay into steady equilibrium
                 let curve = (1 - Math.exp(-progress * 4.5)) * (h * 0.40);
                 let noise = Math.sin(x * 0.05 + waveTime * 0.8) * 2;
                 let y = (h * 0.85) - curve + noise;
@@ -1195,17 +1293,6 @@ jobs:
 
         function updateValDisplay(id, text) {
             document.getElementById(id).innerText = text;
-        }
-
-        function copyInstallCmd() {
-            navigator.clipboard.writeText('pip install omnisim-engine');
-            const status = document.getElementById('copy-status');
-            status.innerText = 'COPIED';
-            status.style.color = 'var(--cyan)';
-            setTimeout(() => {
-                status.innerText = 'COPY';
-                status.style.color = 'var(--text-muted)';
-            }, 2000);
         }
 
         function switchCanvasTab(tab) {
@@ -1280,7 +1367,7 @@ jobs:
                         <div class="metric-matrix">
                             <div><div class="matrix-label">Gateway P99</div><div class="matrix-val" style="color: var(--cyan);">15 ms (-99.4%)</div></div>
                             <div><div class="matrix-label">Datastore Pool</div><div class="matrix-val" style="color: var(--cyan);">${optSat}%</div></div>
-                            <div><div class="matrix-label">Remediation Patch</div><div class="matrix-val" style="color: var(--cyan);">SYNTHESIZED</div></div>
+                            <div><div class="matrix-label">Remediation Status</div><div class="matrix-val" style="color: var(--cyan);">SYNTHESIZED</div></div>
                         </div>
                     </div>
                 `;
@@ -1291,15 +1378,15 @@ jobs:
                         <div style="color: var(--cyan); font-size: 12px; letter-spacing: 2px; margin-bottom: 20px;">ONTOLOGY TOPOLOGY MAPPING // LIVE GRAPH</div>
                         <div style="display: flex; flex-direction: column; gap: 14px; font-size: 12px;">
                             <div style="padding: 14px; background: var(--bg-surface); border: 1px solid var(--border-subtle); display: flex; justify-content: space-between;">
-                                <span>[ENTITY] aws_autoscaling_group.web_asg</span>
+                                <span>[ENTITY] Compute Cluster Topology (ASG)</span>
                                 <span style="color: var(--text-muted);">ACTIVE: 8 NODES | MAX: 28</span>
                             </div>
                             <div style="padding-left: 24px; color: var(--cyan); font-size: 11px;">
                                 &darr; (DIRECT TRAFFIC FLOW &bull; CONCURRENCY: 18 THREADS/NODE)
                             </div>
                             <div style="padding: 14px; background: var(--bg-surface); border: 1px solid var(--border-subtle); display: flex; justify-content: space-between;">
-                                <span>[ENTITY] aws_db_instance.primary_rds</span>
-                                <span style="color: var(--cyan);">CAPACITY: 1,365 MAX CONNECTIONS (db.r6g.large)</span>
+                                <span>[ENTITY] Primary Relational Datastore</span>
+                                <span style="color: var(--cyan);">CAPACITY: 1,365 MAX CONNECTIONS (r6g tier)</span>
                             </div>
                             <div style="padding-left: 24px; color: var(--text-muted); font-size: 11px;">
                                 &darr; (INVARIANT CONSTRAINT: pool_saturation &le; 0.90)
@@ -1314,35 +1401,37 @@ jobs:
             } else if (currentTab === 'titan') {
                 if (waveformBox) waveformBox.style.display = 'none';
                 container.innerHTML = `
-                    <div style="border: 1px solid var(--border-subtle); background: #000; font-family: var(--font-mono); font-size: 12px; animation: card-appear 0.4s ease-out;">
-                        <div style="padding: 14px 20px; border-bottom: 1px solid var(--border-subtle); color: var(--cyan); letter-spacing: 1px;">
-                            TITAN AUTO-REMEDIATION // SYNTHESIZED UNIFIED DIFF
+                    <div style="border: 1px solid var(--border-subtle); background: #000; padding: 28px; animation: card-appear 0.4s ease-out;">
+                        <div style="font-family: var(--font-mono); font-size: 12px; color: var(--cyan); letter-spacing: 2px; margin-bottom: 16px;">
+                            TITAN AUTONOMOUS REMEDIATION // SYNTHESIS PIPELINE
                         </div>
-                        <pre style="padding: 24px; line-height: 1.8; overflow-x: auto;">
-<span style="color: var(--text-muted);">--- terraform/main.tf (Current Branch Head)</span>
-<span style="color: var(--text-muted);">+++ terraform/main.tf (OmniSim Autonomous Remediation)</span>
-<span style="color: var(--cyan);">@@ -18,4 +18,4 @@</span>
- resource "aws_db_instance" "primary_rds" {
-   name           = "production-db"
-<span style="color: var(--danger);">-  instance_class = "db.t3.medium"</span>
-<span style="color: var(--cyan);">+  instance_class = "db.r6g.large"</span>
- }
-                        </pre>
-                        <div style="padding: 14px 20px; border-top: 1px solid var(--border-subtle); background: var(--bg-surface); font-size: 11px; color: var(--text-muted);">
-                            PATCH EXPLANATION: Upgraded instance class to absorb 504 peak connection requests with safe 35% headroom. Invariants 100% satisfied.
+                        <div style="font-size: 14px; color: var(--text-body); line-height: 1.7; margin-bottom: 24px;">
+                            Titan automatically identified that the proposed infrastructure topology would exhaust the database connection pool during peak traffic surges. An automated architecture upgrade was synthesized to elevate datastore capacity from 412 to 1,365 concurrent connections, providing 35% safe headroom with zero manual intervention.
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-family: var(--font-mono); font-size: 12px;">
+                            <div style="padding: 16px; background: rgba(255, 51, 68, 0.04); border: 1px solid rgba(255, 51, 68, 0.3);">
+                                <div style="color: var(--danger); margin-bottom: 8px;">VULNERABLE TOPOLOGY (HEAD)</div>
+                                <div style="color: var(--text-muted);">Instance Tier: db.t3.medium</div>
+                                <div style="color: var(--text-muted);">Max Capacity: 412 connections</div>
+                                <div style="color: var(--danger); margin-top: 6px;">Outcome: SLA Pool Collapse</div>
+                            </div>
+                            <div style="padding: 16px; background: rgba(0, 240, 255, 0.04); border: 1px solid var(--cyan);">
+                                <div style="color: var(--cyan); margin-bottom: 8px;">REMEDIATED TOPOLOGY (TITAN)</div>
+                                <div style="color: var(--text-stark);">Instance Tier: db.r6g.large</div>
+                                <div style="color: var(--text-stark);">Max Capacity: 1,365 connections</div>
+                                <div style="color: var(--cyan); margin-top: 6px;">Outcome: 100% Invariant Compliant</div>
+                            </div>
                         </div>
                     </div>
                 `;
             }
         }
 
-        // Initialize background animation and simulation loop
         document.addEventListener('DOMContentLoaded', () => {
             resizeCanvas();
             animateOntologyMesh();
             triggerSimUpdate();
 
-            // Continuous waveform oscillation
             function loopWaveform() {
                 if (currentTab === 'horizon') {
                     const traffic = parseFloat(document.getElementById('sl-traffic').value);
