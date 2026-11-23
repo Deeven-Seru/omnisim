@@ -79,17 +79,43 @@ Instead of guessing tokens, OmniSim ingests production topology (Kubernetes, Ope
 
 ---
 
-## 3. Quickstart
+## 3. Installation & Distribution
 
-### Installation
+OmniSim can be installed across multiple package managers and environments:
+
+### via `pip` (Python 3.10+)
 
 ```bash
-git clone https://github.com/Deeven-Seru/omnisim.git
-cd omnisim
-pip install .
+# Direct from PyPI
+pip install omnisim
+
+# Or directly from the GitHub Release Wheel
+pip install https://github.com/Deeven-Seru/omnisim/releases/download/v1.0.0/omnisim-1.0.0-py3-none-any.whl
+
+# Or from source
+pip install git+https://github.com/Deeven-Seru/omnisim.git
 ```
 
-### 60-Second CI/CD Integration: GitHub Action
+### via `brew` (Homebrew on macOS / Linux)
+
+```bash
+brew install Deeven-Seru/omnisim/omnisim
+```
+
+### via Standalone `curl` Installer (No manual venv setup)
+
+```bash
+curl -sSL https://raw.githubusercontent.com/Deeven-Seru/omnisim/main/scripts/install.sh | bash
+```
+
+### via `Docker` Container
+
+```bash
+# Run simulation in an isolated container
+docker run --rm -v $(pwd):/workspace ghcr.io/deeven-seru/omnisim:v1 simulate --domain systems
+```
+
+### via GitHub Action (CI/CD Safety Gate)
 
 Drop OmniSim directly into any repository's `.github/workflows/` to block cascading outages before code merges:
 
@@ -103,7 +129,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: OmniSim Pre-Flight Safety Gate
-        uses: Deeven-Seru/omnisim@main
+        uses: Deeven-Seru/omnisim@v1
         with:
           path: terraform/
           fail-on-violation: "true"
