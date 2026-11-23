@@ -1,0 +1,40 @@
+name: "OmniSim Pre-Flight Infrastructure Gate"
+description: "Simulates 10,000 counterfactual futures on every Terraform and Kubernetes PR before merge."
+author: "Deeven Seru"
+
+inputs:
+  terraform-file:
+    description: "Path to the Terraform .tf file or plan to audit"
+    required: false
+    default: ""
+  traffic-scale:
+    description: "Multiplier of baseline traffic surge to test (e.g. 1.5 = 150% traffic)"
+    required: false
+    default: "1.5"
+  horizon:
+    description: "Number of steps forward to simulate"
+    required: false
+    default: "6"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install OmniSim
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install git+https://github.com/Deeven-Seru/omnisim.git
+
+    - name: Run OmniSim Pre-Flight Simulation
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.terraform-file }}" ]; then
+          python -m omnisim.cli terraform --file "${{ inputs.terraform-file }}"
+        else
+          python -m omnisim.cli simulate --domain systems --horizon "${{ inputs.horizon }}"
+        fi
