@@ -39,7 +39,7 @@ TIER_LIMITS = {
         "max_rollouts": 100_000,
         "rate_limit_per_min": 10_000,
         "custom_dynamics": True,
-        "sla_guarantee": "99.99% Availability + Dedicated Blackwell Clusters",
+        "sla_guarantee": "99.99% Availability + Dedicated High-Throughput Compute",
     },
 }
 

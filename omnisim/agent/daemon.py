@@ -72,12 +72,12 @@ class OmniSimAgentDaemon:
         self.is_running = False
 
     def _fetch_telemetry(self) -> List[Dict[str, Any]]:
-        """Extracts metrics from Prometheus HTTP API or mock telemetry stream."""
+        """Extracts metrics from Prometheus HTTP API or local telemetry buffer."""
         if self.config.prometheus_url:
             try:
                 # Query Prometheus instant vector endpoint
                 query_url = f"{self.config.prometheus_url}/api/v1/query?query=up"
-                req = urllib.request.Request(query_url, headers={"User-Agent": "OmniSim-Agent/0.1.0"})
+                req = urllib.request.Request(query_url, headers={"User-Agent": "OmniSim-Agent/1.0.0"})
                 with urllib.request.urlopen(req, timeout=3.0) as resp:
                     data = json.loads(resp.read().decode("utf-8"))
                     logging.info("Prometheus telemetry stream online.")

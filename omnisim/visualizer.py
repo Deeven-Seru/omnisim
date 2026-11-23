@@ -71,7 +71,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <body>
     <header>
         <div class="logo">OMNI<span>SIM</span></div>
-        <div class="badge">SAC ENGINE // PRE-EXECUTION INVARIANT VERIFICATION</div>
+        <div class="badge">OMNISIM ENGINE // PRE-EXECUTION INVARIANT VERIFICATION</div>
     </header>
 
     <div class="grid">

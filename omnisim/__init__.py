@@ -11,7 +11,7 @@ from omnisim.models.dynamics import WorldDynamicsModel
 from omnisim.models.search import CounterfactualMCTS
 from omnisim.verifiers.evaluator import InvariantEvaluator
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 __all__ = [
     "UniversalState",
     "Entity",

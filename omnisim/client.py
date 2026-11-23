@@ -28,13 +28,21 @@ class OmniSimClient:
         self.timeout = timeout
         self.is_local = (api_key == "local")
 
+    def _get_local_tenant(self, platform) -> Any:
+        tenant = platform.db.get_tenant("org_local_workspace")
+        if not tenant:
+            from omnisim.saas.models import PlanTier, Tenant
+            tenant = Tenant(id="org_local_workspace", name="Local Workspace", tier=PlanTier.ENTERPRISE)
+            platform.db.save_tenant(tenant)
+        return tenant
+
     # --------------------------------------------------------------------------
     # Health & Diagnostics
     # --------------------------------------------------------------------------
     def health(self) -> Dict[str, Any]:
         """Checks the availability of the OmniSim API Gateway."""
         if self.is_local:
-            return {"status": "HEALTHY", "mode": "IN_PROCESS", "version": "0.1.0"}
+            return {"status": "HEALTHY", "mode": "IN_PROCESS", "version": "1.0.0"}
         return self._request("GET", "/health")
 
     # --------------------------------------------------------------------------
@@ -50,7 +58,7 @@ class OmniSimClient:
         if self.is_local:
             from omnisim.saas.engine import OmniSimSaaSPlatform
             platform = OmniSimSaaSPlatform()
-            tenant = platform.tenants["org_enterprise_acme"]
+            tenant = self._get_local_tenant(platform)
             return platform.execute_simulation(
                 tenant=tenant,
                 domain=domain,
@@ -87,7 +95,7 @@ class OmniSimClient:
         if self.is_local:
             from omnisim.saas.engine import OmniSimSaaSPlatform
             platform = OmniSimSaaSPlatform()
-            tenant = platform.tenants["org_enterprise_acme"]
+            tenant = self._get_local_tenant(platform)
             return platform.process_github_pr_webhook(tenant, payload)
 
         return self._request("POST", "/api/v1/webhooks/github", payload)
@@ -101,7 +109,7 @@ class OmniSimClient:
         if self.is_local:
             from omnisim.saas.engine import OmniSimSaaSPlatform
             platform = OmniSimSaaSPlatform()
-            tenant = platform.tenants["org_enterprise_acme"]
+            tenant = self._get_local_tenant(platform)
             return platform.ingest_telemetry_stream(tenant, metrics)
 
         return self._request("POST", "/api/v1/ingest/telemetry", payload)
@@ -110,15 +118,20 @@ class OmniSimClient:
     # Billing & Quotas
     # --------------------------------------------------------------------------
     def get_billing_usage(self) -> Dict[str, Any]:
-        """Fetches the current tenant plan, monthly quota, and usage counters."""
+        """Fetches the current tenant plan, monthly quota, and usage counters from durable storage."""
         if self.is_local:
+            from omnisim.saas.engine import OmniSimSaaSPlatform
+            from omnisim.saas.models import TIER_LIMITS
+            platform = OmniSimSaaSPlatform()
+            tenant = self._get_local_tenant(platform)
+            limits = TIER_LIMITS[tenant.tier]
             return {
-                "tenant_id": "org_local",
-                "tier": "ENTERPRISE",
-                "monthly_usage": 0,
-                "monthly_quota": 1_000_000,
-                "quota_remaining": 1_000_000,
-                "sla_guarantee": "Unlimited Local Mode",
+                "tenant_id": tenant.id,
+                "tier": tenant.tier.value,
+                "monthly_usage": tenant.monthly_usage_count,
+                "monthly_quota": limits["monthly_simulations"],
+                "quota_remaining": max(0, limits["monthly_simulations"] - tenant.monthly_usage_count),
+                "sla_guarantee": limits["sla_guarantee"],
             }
         return self._request("GET", "/api/v1/billing/usage")
 
@@ -130,7 +143,7 @@ class OmniSimClient:
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}",
-            "User-Agent": "OmniSim-Python-SDK/0.1.0",
+            "User-Agent": "OmniSim-Python-SDK/1.0.0",
         }
         data = json.dumps(payload).encode("utf-8") if payload is not None else None
         req = urllib.request.Request(url, data=data, headers=headers, method=method)

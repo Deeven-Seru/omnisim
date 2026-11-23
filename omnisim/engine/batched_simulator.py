@@ -2,7 +2,7 @@
 
 Executes thousands of parallel counterfactual trajectories with stochastic
 noise, yielding empirical probability distributions of invariant violations
-and confidence intervals on Blackwell GPUs or multi-core CPUs.
+and confidence intervals on GPUs (CUDA/MPS) or multi-core CPUs.
 """
 
 from __future__ import annotations

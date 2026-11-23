@@ -154,7 +154,7 @@ class OmniSimAPIServer(http.server.SimpleHTTPRequestHandler):
             self._send_json({
                 "status": "HEALTHY",
                 "version": SERVER_VERSION,
-                "engine": "OmniSim SAC World Model",
+                "engine": "OmniSim Counterfactual World Model",
                 "platform": "OmniSim Cloud Multi-Tenant SaaS",
             })
             return

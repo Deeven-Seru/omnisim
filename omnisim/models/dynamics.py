@@ -1,7 +1,7 @@
 """World Dynamics Model for OmniSim.
 
 Implements the transition function: S_{t+1} = f_theta(S_t, A_t) + epsilon.
-Supports hardware acceleration across Blackwell GPUs (CUDA), Apple Silicon (MPS),
+Supports hardware acceleration across CUDA GPUs, Apple Silicon (MPS),
 and vectorized multi-core CPU execution with graph-causal propagation.
 """
 
