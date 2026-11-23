@@ -1,90 +1,99 @@
 <div align="center">
 
-<img src="assets/omnisim-banner.svg" alt="OmniSim: The Universal Counterfactual Simulation Engine" width="100%" />
+<img src="assets/omnisim-banner.svg" alt="OmniSim: Foundational Software for Infrastructure Survivability" width="100%" />
 
 <br/><br/>
 
-[![CI Pipeline](https://img.shields.io/badge/CI_PIPELINE-PASSING-D4AF37?style=for-the-badge&logo=githubactions&logoColor=D4AF37&labelColor=08080A)](https://github.com/Deeven-Seru/omnisim/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/LICENSE-MIT-D4AF37?style=for-the-badge&labelColor=08080A)](LICENSE)
-[![Python: 3.10 | 3.11 | 3.12](https://img.shields.io/badge/PYTHON-3.10%20%7C%203.11%20%7C%203.12-D4AF37?style=for-the-badge&logo=python&logoColor=D4AF37&labelColor=08080A)](https://python.org)
-[![Research Paper](https://img.shields.io/badge/RESEARCH_PAPER-PDF_AVAILABLE-D4AF37?style=for-the-badge&labelColor=08080A)](paper/omnisim_paper.pdf)
-[![Architecture: SAC](https://img.shields.io/badge/ARCHITECTURE-SAC_WORLD_MODEL-D4AF37?style=for-the-badge&labelColor=08080A)](ARCHITECTURE.md)
+[![CI Pipeline](https://img.shields.io/badge/CI-PASSING-0D0E10?style=for-the-badge&logo=githubactions&logoColor=FFFFFF&labelColor=000000)](https://github.com/Deeven-Seru/omnisim/actions/workflows/ci.yml)
+[![Live Site](https://img.shields.io/badge/ENTERPRISE_WEB-ONLINE-0D0E10?style=for-the-badge&logo=cloudflarepages&logoColor=FFFFFF&labelColor=000000)](https://omnisim-dfx.pages.dev/)
+[![PyPI](https://img.shields.io/badge/PYPI-v1.0.0-0D0E10?style=for-the-badge&logo=pypi&logoColor=FFFFFF&labelColor=000000)](https://pypi.org/project/omnisim-engine/)
+[![License: MIT](https://img.shields.io/badge/LICENSE-MIT-0D0E10?style=for-the-badge&labelColor=000000)](LICENSE)
+[![Python: 3.10 | 3.11 | 3.12](https://img.shields.io/badge/PYTHON-3.10%20%7C%203.11%20%7C%203.12-0D0E10?style=for-the-badge&logo=python&logoColor=FFFFFF&labelColor=000000)](https://python.org)
 
 <br/>
 
 <p align="center">
-  <b>Beyond Autoregressive Token Prediction to Action-Conditioned World Simulation.</b><br/>
-  Simulate tens of thousands of counterfactual future timelines before modifying production state.
+  <b>Foundational Software for Infrastructure Survivability.</b><br/>
+  Action-Conditioned World Models, Causal Invariant Verification, and Autonomous Remediation Synthesis.
 </p>
 
-<img src="assets/omnisim_thumbnail.png" alt="OmniSim Counterfactual Manifold Simulation" width="100%" style="border-radius: 8px; border: 1px solid #2D2719;" />
+<p align="center">
+  <a href="https://omnisim-dfx.pages.dev/"><b>Launch Enterprise Mission Control &rarr;</b></a>
+</p>
+
+<img src="assets/omnisim_thumbnail.png" alt="OmniSim Causal Manifold Simulation" width="100%" style="border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.16);" />
 
 </div>
 
 ---
 
-## 1. Executive Thesis: Why Text Models Hit a Ceiling
+## 01 ——→ Executive Thesis: Beyond Autoregressive Generation
 
-In 2017, Google published *"Attention Is All You Need"*, treating it as a machine translation improvement. Scaling autoregressive transformers over internet tokens unlocked conversational fluency, culminating in ChatGPT.
+In 2017, the transformer architecture unified natural language processing through autoregressive token prediction. Scaling conversational fluency culminated in modern large language models.
 
 **However, LLMs are advisory oracles, not execution engines.**
 
-When asking an LLM:
-* *"How should our distributed architecture scale under a 3x flash sale?"*
-* *"If we raise our SaaS tier price by 15%, what happens to churn and runway?"*
-* *"If our primary database connection pool nears saturation, what compound intervention guarantees zero outage?"*
+When asking a generative model:
+* *"How will our distributed architecture behave during an unpredicted 4x traffic surge?"*
+* *"If we scale our compute cluster from 4 to 28 instances, does downstream datastore capacity hold?"*
+* *"What compound remediation intervention guarantees zero downtime under connection pool saturation?"*
 
-An LLM emits **statistically plausible text**. It cannot simulate physical, logical, or financial invariants across time. Operating on text-only predictions forces engineers into blind production deployments and catastrophic cascading failures.
+An LLM generates **statistically probable text**. It cannot simulate physical, temporal, or queuing dynamics across continuous time. Operating on language approximations forces platform engineers into blind production deployments and catastrophic cascading outages.
 
-**OmniSim flips this paradigm.** Grounded in **Action-Conditioned World Models, Test-Time Training (TTT), and Counterfactual Search (MCTS)**, OmniSim is an enterprise-grade **State-Action-Consequence (SAC)** simulation engine. 
+**OmniSim grounds reliability in physics.** Grounded in **Action-Conditioned World Models ($S_{t+1} = f_\theta(S_t, A_t) + \epsilon$)**, **Causal Dependency Graphs**, and **Monte Carlo Rollout Search**, OmniSim compiles production infrastructure into a living digital twin.
 
-Instead of guessing tokens, OmniSim ingests production topology (Kubernetes, OpenTelemetry, Terraform IaC), models non-linear dynamics, branches thousands of counterfactual intervention trajectories forward across arbitrary horizons, and proves which actions survive critical operational invariants before you execute.
-
----
-
-## 2. Core Architecture: The 3-Tier Simulation Engine
-
-```
-[ Current System State S_0 ] ──► [ Relational Entity Graph & Invariant Rules ]
-                                                 │
-                                                 ▼
-                                   ┌───────────────────────────┐
-                                   │ Tier 1: World Model       │
-                                   │ S_{t+1} = f_θ(S_t, A_t)   │
-                                   └─────────────┬─────────────┘
-                                                 ▼
-                                   ┌───────────────────────────┐
-                                   │ Tier 2: Counterfactual    │
-                                   │ Monte Carlo Tree Search   │
-                                   └─────────────┬─────────────┘
-                                                 ▼
-                                   ┌───────────────────────────┐
-                                   │ Tier 3: Invariant Audits  │
-                                   │ & Deterministic Verifiers │
-                                   └─────────────┬─────────────┘
-                                                 ▼
-                 [ Executive Consequence Report & Optimal Intervention Plan ]
-```
-
-1. **Universal State Representation (`omnisim.core.state`):**
-   * Encapsulates entities, continuous metrics, dynamic topology graphs, and invariant rules (SLAs, connection pool ceilings, debt covenants).
-2. **Action-Conditioned World Dynamics (`omnisim.models.dynamics`):**
-   * Propagates non-linear cascades (M/M/1 queuing contention, memory pressure, price elasticity, supply chain bottlenecks).
-   * Accelerated across **NVIDIA Blackwell/Hopper GPUs (CUDA)**, **Apple Silicon (MPS)**, and multi-core vectorized CPU SIMD.
-3. **Counterfactual MCTS Planner (`omnisim.models.search`):**
-   * Searches the combinatorial tree of candidate interventions.
-   * Prunes timelines violating SLA invariants and isolates minimal-cost, Pareto-optimal operational decisions.
-4. **Autonomous Ingestion Adapters (`omnisim.ingest`):**
-   * Native parsers for **Terraform HCL/JSON**, **Kubernetes Pod/HPA manifests**, and live **OpenTelemetry OTLP** streams.
+Instead of guessing tokens, OmniSim parses Terraform infrastructure declarations, Kubernetes pod affinities, and live CloudWatch metrics. It branches candidate future states forward in continuous integration pipelines, mathematically verifying that critical system invariants survive before code merges.
 
 ---
 
-## 3. Step-by-Step Case Study: Outage Prevention Walkthrough
+## 02 ——→ Core Architecture: The Four Foundational Platforms
 
-To understand how OmniSim operates, walk through this minimal real-world case study: detecting and auto-remediating an AWS RDS connection pool exhaustion catastrophe before code is merged.
+```
+[ Static Declarations & Live OTLP Telemetry ]
+                     │
+                     ▼
+  ┌─────────────────────────────────────────────────────────────┐
+  │ 01 ——→ OMNISIM ONTOLOGY (Causal Digital Twin)               │
+  │ Relational DAG Ingestion & Physical Limits Compilation      │
+  └──────────────────────────────┬──────────────────────────────┘
+                                 ▼
+  ┌─────────────────────────────────────────────────────────────┐
+  │ 02 ——→ OMNISIM HORIZON (Action-Conditioned World Model)    │
+  │ S_{t+1} = f_θ(S_t, A_t) · Monte Carlo Rollout Search       │
+  └──────────────────────────────┬──────────────────────────────┘
+                                 ▼
+  ┌─────────────────────────────────────────────────────────────┐
+  │ 03 ——→ OMNISIM SENTRY (Continuous Pre-Execution Gate)       │
+  │ Mathematical Invariant Boundaries & Zero Fail Tolerance     │
+  └──────────────────────────────┬──────────────────────────────┘
+                                 ▼
+  ┌─────────────────────────────────────────────────────────────┐
+  │ 04 ——→ OMNISIM TITAN (Autonomous Remediation Engine)        │
+  │ Pareto-Optimal Synthesis & Automated Unified Git Patches    │
+  └──────────────────────────────┬──────────────────────────────┘
+                                 ▼
+           [ 100% Invariant Compliant Production State ]
+```
+
+1. **OmniSim Ontology (`omnisim.core.state`):**
+   * Encapsulates entities, continuous metrics, dynamic topology graphs, and invariant rules (connection pool ceilings, queuing limits, quorum constraints).
+2. **OmniSim Horizon (`omnisim.models.dynamics`):**
+   * Propagates non-linear cascades (M/M/1 queuing contention, memory pressure, thread pool exhaustion, network serialization latency).
+   * Vectorized acceleration across multi-core server SIMD architectures with sub-millisecond rollout latency.
+3. **OmniSim Sentry (`omnisim.models.search`):**
+   * Pre-execution CI gatekeeper evaluating candidate pull requests against high-stress traffic trajectories.
+   * Blocks invariant breaches before deployment authorization.
+4. **OmniSim Titan (`omnisim.core.engine`):**
+   * Synthesizes mathematically proven architecture upgrades (e.g., upgrading RDS instance tiers or tuning thread pools) directly as unified Git patches.
+
+---
+
+## 03 ——→ Outage Prevention: Step-by-Step Case Study
+
+A real-world walkthrough: detecting and autonomously remediating an AWS RDS connection pool exhaustion catastrophe before code is merged.
 
 ### The Scenario
-An engineering team modifies an Auto-Scaling Group in Terraform to allow scaling up to 28 instances during traffic surges, backed by a `db.t3.medium` Postgres RDS instance. Static linters (`tflint`, `terraform validate`) report zero errors because the syntax is valid. However, under peak load, 28 web instances open 504 connections against a database with a hard ceiling of 412 connections.
+An engineering team modifies an Auto-Scaling Group in Terraform to allow scaling up to 28 instances during traffic surges, backed by a `db.t3.medium` Postgres RDS instance. Static linters (`tflint`, `terraform validate`) report zero errors because the syntax is valid. However, under peak load, 28 web instances open 504 connections against a database with a hard physical ceiling of 412 connections.
 
 ### Step 1: Install OmniSim
 
@@ -187,7 +196,22 @@ jobs:
 
 ---
 
-## 4. CLI Command Reference
+## 04 ——→ Deterministic Invariant Catalog
+
+OmniSim enforces physical boundaries across distributed computing environments:
+
+| Invariant Code | Boundary Definition | Mathematical Invariant | Enforced Failure Mitigation |
+| :--- | :--- | :--- | :--- |
+| **INV-01** | Datastore Pool Ceiling | `pool_saturation <= 0.85` | Eliminates connection starvation under burst traffic |
+| **INV-02** | Thread Fanout Starvation | `worker_threads * nodes < max_conn` | Prevents uncoordinated horizontal autoscaling crashes |
+| **INV-03** | Cascading Tail Dampening | `timeout_p99 <= 120ms` | Halts recursive microservice retry storms |
+| **INV-04** | Memory Headroom Guard | `heap_alloc <= 0.80 * node_ram` | Eliminates unpredictable Linux OOM-killer container terminations |
+| **INV-05** | Quorum Partition Gate | `active_zones >= 3` | Guarantees split-brain immunity during availability-zone disconnects |
+| **INV-06** | Acyclic Call Enforcement | `graph_cycles == 0` | Proves absence of distributed call graph deadlocks |
+
+---
+
+## 05 ——→ CLI Command Reference
 
 Execute counterfactual evaluations directly from the terminal:
 
@@ -231,7 +255,7 @@ omnisim serve --port 8088
 
 ---
 
-## 5. Installation & Distribution Matrix
+## 06 ——→ Installation & Distribution Matrix
 
 | Channel | Command | Description |
 | :--- | :--- | :--- |
@@ -243,7 +267,7 @@ omnisim serve --port 8088
 
 ---
 
-## 6. Empirical Validation: Public Datasets & Production Post-Mortems
+## 07 ——→ Empirical Validation: Public Datasets & Production Post-Mortems
 
 OmniSim has been benchmarked directly against real-world catastrophic failure post-mortems and canonical public datasets:
 
@@ -267,14 +291,15 @@ See [tests/test_github_validation.py](tests/test_github_validation.py) for repro
 
 ---
 
-## 7. Research Paper & Architecture
+## 08 ——→ Research Paper & Architecture
 
 * **Academic Paper:** [OmniSim: Universal Counterfactual Simulation Engine (PDF)](paper/omnisim_paper.pdf) | [Markdown Version](paper/omnisim_paper.md) | [LaTeX Source](paper/omnisim_paper.tex)
 * **System Architecture Specification:** [ARCHITECTURE.md](ARCHITECTURE.md)
+* **Enterprise Web Interface:** [https://omnisim-dfx.pages.dev/](https://omnisim-dfx.pages.dev/)
 
 ---
 
-## 8. License & Attribution
+## 09 ——→ License & Attribution
 
 Distributed under the MIT License. See [LICENSE](LICENSE) for details.
 OmniSim is maintained by [Deeven-Seru](https://github.com/Deeven-Seru).
