@@ -79,45 +79,95 @@ Instead of guessing tokens, OmniSim ingests production topology (Kubernetes, Ope
 
 ---
 
-## 3. Installation & Distribution
+## 3. Step-by-Step Case Study: Outage Prevention Walkthrough
 
-OmniSim can be installed across multiple package managers and environments:
+To understand how OmniSim operates, walk through this minimal real-world case study: detecting and auto-remediating an AWS RDS connection pool exhaustion catastrophe before code is merged.
 
-### via `pip` (Python 3.10+)
+### The Scenario
+An engineering team modifies an Auto-Scaling Group in Terraform to allow scaling up to 28 instances during traffic surges, backed by a `db.t3.medium` Postgres RDS instance. Static linters (`tflint`, `terraform validate`) report zero errors because the syntax is valid. However, under peak load, 28 web instances open 504 connections against a database with a hard ceiling of 412 connections.
+
+### Step 1: Install OmniSim
+
+Install the CLI directly from PyPI:
 
 ```bash
-# Direct from PyPI
 pip install omnisim-engine
-
-# Or directly from the GitHub Release Wheel
-pip install https://github.com/Deeven-Seru/omnisim/releases/download/v1.0.0/omnisim_engine-1.0.0-py3-none-any.whl
-
-# Or from source
-pip install git+https://github.com/Deeven-Seru/omnisim.git
 ```
 
-### via `brew` (Homebrew on macOS / Linux)
+### Step 2: Define Infrastructure as Code
+
+Target the Terraform configuration ([examples/vulnerable_infrastructure.tf](examples/vulnerable_infrastructure.tf)):
+
+```hcl
+resource "aws_autoscaling_group" "web_asg" {
+  name             = "prod-web-asg"
+  min_size         = 4
+  max_size         = 28
+  desired_capacity = 4
+}
+
+resource "aws_db_instance" "postgres" {
+  name           = "prod-primary-rds"
+  instance_class = "db.t3.medium"
+  engine         = "postgres"
+}
+```
+
+### Step 3: Run Pre-Flight Counterfactual Simulation
+
+Execute a non-destructive counterfactual rollout across the simulation horizon:
 
 ```bash
-brew install Deeven-Seru/omnisim/omnisim
+omnisim terraform examples/vulnerable_infrastructure.tf
 ```
 
-### via Standalone `curl` Installer (No manual venv setup)
+OmniSim dynamically constructs the relational entity graph and simulates the ASG scale-out:
+
+```text
+[INFO] Ingesting Terraform Infrastructure as Code (IaC)...
+[OK] Parsed 2 Terraform resources:
+  - [aws_autoscaling_group] asg_web_asg (max_size: 28)
+  - [aws_db_instance] rds_postgres (max_connections: 412)
+
+[SIMULATION] Simulating peak Auto-Scaling group burst to max_size...
+
+[CRITICAL] CATASTROPHIC VIOLATION DETECTED IN TERRAFORM PLAN!
+   Breaches: 3 critical SLA violations.
+   - Step 4: rds_postgres.pool_saturation=0.96 (rule: <= 0.90)
+   - Step 5: rds_postgres.pool_saturation=1.00 (rule: <= 0.90)
+   - Step 6: rds_postgres.pool_saturation=1.00 (rule: <= 0.90)
+
+[RECOMMENDATION] TERRAFORM CODE REMEDIATION:
+   Change: instance_class = "db.t3.medium" -> instance_class = "db.r6g.large"
+   Reason: db.t3.medium limits at 412 connections, but ASG max_size 28 requires 504 connections.
+```
+
+### Step 4: Synthesize Autonomous Git Remediation Patch
+
+Generate a verified Git unified diff patch ready for direct application:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/Deeven-Seru/omnisim/main/scripts/install.sh | bash
+omnisim patch examples/vulnerable_infrastructure.tf --output fix.patch
 ```
 
-### via `Docker` Container
+Output:
 
-```bash
-# Run simulation in an isolated container
-docker run --rm -v $(pwd):/workspace ghcr.io/deeven-seru/omnisim:v1 simulate --domain systems
+```diff
+--- terraform/main.tf (Current Head)
++++ terraform/main.tf (OmniSim Auto-Remediation)
+@@ -10,3 +10,3 @@
+ resource "aws_db_instance" "postgres" {
+   name           = "prod-primary-rds"
+-  instance_class = "db.t3.medium"
++  instance_class = "db.r6g.large"
+   engine         = "postgres"
 ```
 
-### via GitHub Action (CI/CD Safety Gate)
+Under `db.r6g.large`, maximum connections increase to 1,365, capping pool saturation to 36.9% and completely eliminating SLA breaches.
 
-Drop OmniSim directly into any repository's `.github/workflows/` to block cascading outages before code merges:
+### Step 5: Enforce as a Pre-Flight CI/CD Gate
+
+Block breaking pull requests automatically by adding OmniSim to `.github/workflows/safety-gate.yml`:
 
 ```yaml
 name: OmniSim Safety Gate
@@ -131,127 +181,69 @@ jobs:
       - name: OmniSim Pre-Flight Safety Gate
         uses: Deeven-Seru/omnisim@v1
         with:
-          path: terraform/
+          path: examples/vulnerable_infrastructure.tf
           fail-on-violation: "true"
-```
-
-### Launch OmniSim Cloud SaaS Portal & API Gateway
-
-Launches the multi-tenant SaaS control plane with live organization quotas, GitHub PR pre-flight gatekeeper feed, and REST APIs:
-
-```bash
-python3 -m omnisim.server
-# Open http://localhost:8088 in your browser
-```
-
-### Launch Interactive Timeline Visualizer
-
-Spins up the low-level timeline visualizer with dynamic slider controls, branching counterfactual trees, and metric deltas:
-
-```bash
-python3 -m omnisim.visualizer
-# Open http://localhost:8088/visualizer
-```
-
-### Run Terminal Counterfactual Simulation
-
-```bash
-# Cloud infrastructure resilience scenario
-python3 -m omnisim.cli simulate --domain systems --horizon 6
-```
-
-### Pre-Flight Terraform IaC Fire Audit
-
-Audit Terraform HCL plans before `terraform apply` to detect cascading capacity fires:
-
-```bash
-python3 -m omnisim.cli terraform
-```
-
-### High-Throughput Stochastic Rollout Benchmark
-
-```bash
-# Benchmark 500 parallel stochastic rollouts in < 150ms
-python3 -m omnisim.cli benchmark --domain systems --rollouts 500 --horizon 6
-```
-
-### Autonomous Auto-Remediation Patch Engine
-
-Audit infrastructure code and synthesize zero-downtime Git unified diff patches ready for direct application:
-
-```bash
-python3 -m omnisim.cli patch examples/vulnerable_infrastructure.tf
-```
-
-### OmniSim Cloud & Python Client SDK
-
-OmniSim provides an enterprise Python client SDK and multi-tenant SaaS control plane with pre-flight GitHub PR webhooks:
-
-```python
-from omnisim.client import OmniSimClient
-
-client = OmniSimClient(api_key="your_tenant_key")
-audit = client.audit_pull_request(
-    hcl_code=open("main.tf").read(),
-    pr_number=42,
-    commit_sha="a1b2c3d"
-)
-
-if not audit["passed"]:
-    print(f"Violations detected: {audit['violations_count']}")
-    # Apply autonomous remediation patch directly
-    print(audit["remediation_patch"])
-```
-
-### Canonical Microservices Reference Benchmark
-
-Run simulation across Google Cloud Online Boutique (11 services), Cornell DeathStarBench (7 services), Fudan Train-Ticket (7 services), and Tsinghua GAIA (4 services):
-
-```bash
-python3 -m omnisim.cli microservices
-```
-
-### Telemetry Benchmark (Real AWS CloudWatch Metrics)
-
-Run empirical verification against 8,000+ real-world AWS CloudWatch data points from the Numenta Anomaly Benchmark (NAB):
-
-```bash
-python3 -m omnisim.cli telemetry
-```
-
-### Google Cloud MCP Toolbox Historical Validation
-
-Test OmniSim's blind foresight against Google's real-world Model Context Protocol Database Server (`googleapis/mcp-toolbox`):
-
-```bash
-python3 -m omnisim.cli mcp-toolbox
-```
-
-### TensorFlow Distributed Runtime Validation
-
-Test OmniSim's blind foresight against Google's flagship machine learning engine (`tensorflow/tensorflow`):
-
-```bash
-python3 -m omnisim.cli tensorflow
-```
-
-### Adversarial Robustness Benchmark Suite
-
-Run the 5-phase institutional stress test (Blind Historical Replay, Dark Debt & Uncertainty, Adversarial SRE Traps, Automated Ingestion, Asymmetric Loss Function):
-
-```bash
-python3 -m omnisim.cli robustness
-```
-
-### Execute Test Suite
-
-```bash
-python3 -m unittest discover -s tests -p "test_*.py" -v
 ```
 
 ---
 
-## 4. Empirical Validation: Public Datasets & Production Post-Mortems
+## 4. CLI Command Reference
+
+Execute counterfactual evaluations directly from the terminal:
+
+```bash
+# 1. Run terminal counterfactual simulation across candidate interventions
+omnisim simulate --domain systems --horizon 6
+
+# 2. Benchmark parallel stochastic rollouts (e.g. 500 rollouts in < 150ms)
+omnisim benchmark --domain systems --rollouts 500 --horizon 6
+
+# 3. Audit Terraform IaC plans for cascading capacity bottlenecks
+omnisim terraform examples/vulnerable_infrastructure.tf
+
+# 4. Generate automated Git patch for vulnerable infrastructure
+omnisim patch examples/vulnerable_infrastructure.tf
+
+# 5. Run adversarial robustness stress test (historical replay, poison action traps)
+omnisim robustness
+
+# 6. Benchmark against 8,000+ real AWS CloudWatch data points (Numenta NAB)
+omnisim telemetry
+
+# 7. Benchmark canonical microservices (Online Boutique, DeathStarBench, Train-Ticket)
+omnisim microservices
+
+# 8. Test historical defect foresight on Google MCP Toolbox (PR #3921 EMFILE leak)
+omnisim mcp-toolbox
+
+# 9. Test historical runtime validation on TensorFlow (BFC OOM & threadpool deadlocks)
+omnisim tensorflow
+
+# 10. Audit current TensorFlow state against active user issues
+omnisim tf-audit
+
+# 11. Run latent zero-day defect discovery on TensorFlow distributed runtime
+omnisim tf-zero-day
+
+# 12. Launch local REST API Gateway & SaaS Control Plane
+omnisim serve --port 8088
+```
+
+---
+
+## 5. Installation & Distribution Matrix
+
+| Channel | Command | Description |
+| :--- | :--- | :--- |
+| **PyPI** | `pip install omnisim-engine` | Standard Python installation (Python 3.10+) |
+| **Homebrew** | `brew install Deeven-Seru/omnisim/omnisim` | macOS and Linux CLI formula |
+| **Standalone `curl`** | `curl -sSL https://raw.githubusercontent.com/Deeven-Seru/omnisim/main/scripts/install.sh \| bash` | Zero-dependency standalone installation |
+| **Docker** | `docker run --rm -v $(pwd):/workspace ghcr.io/deeven-seru/omnisim:v1` | Isolated container execution |
+| **GitHub Action** | `uses: Deeven-Seru/omnisim@v1` | Pre-flight PR safety gatekeeper in CI/CD |
+
+---
+
+## 6. Empirical Validation: Public Datasets & Production Post-Mortems
 
 OmniSim has been benchmarked directly against real-world catastrophic failure post-mortems and canonical public datasets:
 
@@ -275,14 +267,14 @@ See [tests/test_github_validation.py](tests/test_github_validation.py) for repro
 
 ---
 
-## 5. Research Paper & Architecture
+## 7. Research Paper & Architecture
 
 * **Academic Paper:** [OmniSim: Universal Counterfactual Simulation Engine (PDF)](paper/omnisim_paper.pdf) | [Markdown Version](paper/omnisim_paper.md) | [LaTeX Source](paper/omnisim_paper.tex)
 * **System Architecture Specification:** [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ---
 
-## 6. License & Attribution
+## 8. License & Attribution
 
 Distributed under the MIT License. See [LICENSE](LICENSE) for details.
 OmniSim is maintained by [Deeven-Seru](https://github.com/Deeven-Seru).
