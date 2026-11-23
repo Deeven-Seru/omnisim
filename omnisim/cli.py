@@ -194,7 +194,15 @@ def run_benchmark_cmd(domain: str, rollouts: int, horizon: int) -> None:
     print(f"  Failure Distribution across Steps: {res.all_violations_by_step}\n")
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
+    if argv is None:
+        argv = sys.argv[1:]
+
+    # Default to 'simulate' if flags or no subcommands are passed directly
+    subcommands = {"simulate", "serve", "benchmark", "terraform"}
+    if not argv or (argv[0] not in subcommands and argv[0] not in {"-h", "--help", "-v", "--version"}):
+        argv = ["simulate"] + argv
+
     parser = argparse.ArgumentParser(description="OmniSim: Universal Counterfactual Simulation Engine")
     subparsers = parser.add_subparsers(dest="command", help="Sub-commands")
 
@@ -217,7 +225,7 @@ def main() -> None:
     tf_parser = subparsers.add_parser("terraform", help="Audit Terraform IaC plans for production fires")
     tf_parser.add_argument("--file", type=str, default="", help="Path to .tf or plan file")
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if args.command == "terraform":
         hcl_content = ""

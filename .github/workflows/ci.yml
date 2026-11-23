@@ -32,3 +32,6 @@ jobs:
       - name: Verify CLI Simulation Runner
         run: |
           python -m omnisim.cli --domain systems --horizon 6
+          python -m omnisim.cli simulate --domain systems --horizon 6
+          python -m omnisim.cli benchmark --domain systems --rollouts 50 --horizon 6
+          python -m omnisim.cli terraform
