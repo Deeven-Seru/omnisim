@@ -37,3 +37,4 @@ jobs:
           python -m omnisim.cli terraform
           python -m omnisim.cli vc-gauntlet
           python -m omnisim.cli dataset-benchmark
+          python -m omnisim.cli canonical-benchmarks

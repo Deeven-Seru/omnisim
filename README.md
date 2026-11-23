@@ -120,6 +120,14 @@ python3 -m omnisim.cli terraform
 python3 -m omnisim.cli benchmark --domain systems --rollouts 500 --horizon 6
 ```
 
+### Canonical Microservices Reference Benchmark
+
+Run simulation across Google Cloud Online Boutique (11 services), Cornell DeathStarBench (7 services), Fudan Train-Ticket (7 services), and Tsinghua GAIA (4 services):
+
+```bash
+python3 -m omnisim.cli canonical-benchmarks
+```
+
 ### Public Dataset Benchmark (Real AWS CloudWatch Telemetry)
 
 Run empirical verification against 8,000+ real-world AWS CloudWatch data points from the Numenta Anomaly Benchmark (NAB):
