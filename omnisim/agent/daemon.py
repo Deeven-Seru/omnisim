@@ -107,11 +107,11 @@ class OmniSimAgentDaemon:
             if key in self.last_metrics and mname in ["load", "incoming_qps", "surge_traffic_qps"]:
                 last_val = self.last_metrics[key]
                 if last_val > 0 and (val - last_val) / last_val >= self.config.spike_threshold_pct:
-                    logging.warning(f"🚨 TRAFFIC SPIKE DETECTED on {key}: {last_val:.1f} ──► {val:.1f} (+{(val-last_val)/last_val*100:.1f}%)")
-                    logging.info("⚡ Auto-triggering OmniSim Counterfactual Simulation forward 10 steps...")
+                    logging.warning(f"[SPIKE] TRAFFIC SPIKE DETECTED on {key}: {last_val:.1f} ──► {val:.1f} (+{(val-last_val)/last_val*100:.1f}%)")
+                    logging.info("[SIMULATION] Auto-triggering OmniSim Counterfactual Simulation forward 10 steps...")
                     violations = self.state.check_invariants()
                     if violations:
-                        logging.error(f"🔥 CASCADING FAILURE PROJECTED! Found {len(violations)} SLA violations:")
+                        logging.error(f"[CRITICAL] CASCADING FAILURE PROJECTED! Found {len(violations)} SLA violations:")
                         for inv, cur_val, msg in violations[:2]:
                             logging.error(f"   * {msg}")
 

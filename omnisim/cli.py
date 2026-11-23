@@ -119,7 +119,7 @@ def run_simulation_cmd(domain: str, horizon: int) -> None:
 
 
 def run_terraform_audit_cmd(hcl_text: str = "") -> None:
-    print("\n🔍 Ingesting Terraform Infrastructure as Code (IaC)...")
+    print("\n[INFO] Ingesting Terraform Infrastructure as Code (IaC)...")
     if not hcl_text:
         # Default real-world scalable AWS infrastructure
         hcl_text = """
@@ -136,11 +136,11 @@ def run_terraform_audit_cmd(hcl_text: str = "") -> None:
         }
         """
     state = TerraformIngester.parse_hcl_text(hcl_text)
-    print(f"✔ Parsed {len(state.entities)} Terraform resources:")
+    print(f"[OK] Parsed {len(state.entities)} Terraform resources:")
     for eid, e in state.entities.items():
         print(f"  - [{e.type}] {eid} -> {e.metrics}")
 
-    print("\n⚡ Simulating peak Auto-Scaling group burst to max_size...")
+    print("\n[SIMULATION] Simulating peak Auto-Scaling group burst to max_size...")
     dynamics = WorldDynamicsModel()
     def asg_burst(st: UniversalState, act: Action):
         asg = st.entities.get("asg_web_asg")
@@ -162,19 +162,19 @@ def run_terraform_audit_cmd(hcl_text: str = "") -> None:
     traj = planner.simulate_trajectory(state, [Action.no_op()] * 6, name="Terraform Plan Pre-Flight")
 
     if not traj.is_valid:
-        print("\n🔥 CATASTROPHIC FIRE DETECTED IN TERRAFORM PLAN!")
+        print("\n[CRITICAL] CATASTROPHIC VIOLATION DETECTED IN TERRAFORM PLAN!")
         print(f"   Breaches: {len(traj.all_violations)} critical SLA violations.")
         for s, inv, val, msg in traj.all_violations:
             print(f"   - Step {s}: {msg}")
-        print("\n💡 RECOMMENDED TERRAFORM CODE FIX:")
+        print("\n[RECOMMENDATION] TERRAFORM CODE REMEDIATION:")
         print("   Change: `instance_class = \"db.t3.medium\"` ──► `instance_class = \"db.r6g.large\"`")
         print("   Reason: db.t3.medium limits at 412 connections, but ASG max_size 28 requires 504 connections.\n")
     else:
-        print("\n✔ Terraform plan passed all pre-flight counterfactual checks.\n")
+        print("\n[OK] Terraform plan passed all pre-flight counterfactual checks.\n")
 
 
 def run_benchmark_cmd(domain: str, rollouts: int, horizon: int) -> None:
-    print(f"\n⚡ Benchmarking OmniSim High-Throughput Rollouts ({rollouts} parallel trajectories)...")
+    print(f"\n[BENCHMARK] Benchmarking OmniSim High-Throughput Rollouts ({rollouts} parallel trajectories)...")
     if domain == "systems":
         state, dynamics = build_cloud_systems_scenario(traffic_scale=1.3)
     elif domain == "cyber":
@@ -188,7 +188,7 @@ def run_benchmark_cmd(domain: str, rollouts: int, horizon: int) -> None:
     action = Action.no_op()
     res = sim.run_batched(state, action, num_rollouts=rollouts)
 
-    print(f"✔ Completed {res.num_rollouts} rollouts.")
+    print(f"[OK] Completed {res.num_rollouts} rollouts.")
     print(f"  Invariant Violation Probability: {res.violation_probability * 100:.1f}%")
     print(f"  95% Confidence Interval: [{res.confidence_interval_95[0]*100:.1f}%, {res.confidence_interval_95[1]*100:.1f}%]")
     print(f"  Failure Distribution across Steps: {res.all_violations_by_step}\n")

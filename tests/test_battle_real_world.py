@@ -234,7 +234,7 @@ class TestRealWorldBattleScenarios(unittest.TestCase):
         # 4. OmniSim compound action is the ONLY viable strategy that prevents 100% of outages
         self.assertTrue(traj_compound.is_valid)
         self.assertEqual(len(traj_compound.all_violations), 0)
-        print("✔ SRE Black Friday Scenario Passed: Proven that isolated interventions fail; only OmniSim compound action achieves zero downtime.")
+        print("[OK] SRE Black Friday Scenario Passed: Proven that isolated interventions fail; only OmniSim compound action achieves zero downtime.")
 
     def test_cfo_pricing_war_and_runway_simulation(self):
         """REAL-WORLD USE CASE 2: CFO SaaS Price War & Solvency Boundary."""
@@ -278,7 +278,7 @@ class TestRealWorldBattleScenarios(unittest.TestCase):
             traj_balanced.final_state.get_metric("saas_product", "customers"),
             traj_hike.final_state.get_metric("saas_product", "customers")
         )
-        print("✔ CFO Pricing Strategy Passed: Correctly identified churn acceleration risk.")
+        print("[OK] CFO Pricing Strategy Passed: Correctly identified churn acceleration risk.")
 
     def test_adversarial_and_stress_inputs(self):
         """REAL-WORLD USE CASE 3: Chaos Engineering & Boundary Limits."""
@@ -316,7 +316,7 @@ class TestRealWorldBattleScenarios(unittest.TestCase):
         res = sim.run_batched(state, Action.no_op(), num_rollouts=1000)
         elapsed = time.time() - start_time
 
-        print(f"✔ 1,000 Stochastic Parallel Rollouts completed in: {elapsed*1000:.2f} ms")
+        print(f"[OK] 1,000 Stochastic Parallel Rollouts completed in: {elapsed*1000:.2f} ms")
         print(f"  Throughput: {1000 / elapsed:.0f} full trajectories/sec")
         self.assertEqual(res.num_rollouts, 1000)
         self.assertLess(elapsed, 1.5)  # Must complete 1,000 rollouts in under 1.5 seconds

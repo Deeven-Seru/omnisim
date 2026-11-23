@@ -370,7 +370,7 @@ $$\\text{Score}(n) = \\bar{V}(n) + c \\sqrt{\\frac{\\ln N(\\text{parent})}{N(n)}
 
 def generate():
     HTML_PATH.write_text(ACADEMIC_HTML, encoding="utf-8")
-    print(f"✔ Academic HTML generated: {HTML_PATH}")
+    print(f"[OK] Academic HTML generated: {HTML_PATH}")
 
     # Use Google Chrome headless to print to PDF
     chrome_binary = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
@@ -391,7 +391,7 @@ def generate():
     res = subprocess.run(cmd, capture_output=True, text=True)
     if res.returncode == 0 and PDF_PATH.exists():
         size_kb = PDF_PATH.stat().st_size / 1024
-        print(f"✔ Camera-Ready PDF Compiled Successfully!")
+        print(f"[OK] Camera-Ready PDF Compiled Successfully!")
         print(f"  Location: {PDF_PATH}")
         print(f"  Size: {size_kb:.1f} KB")
         return True

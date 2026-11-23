@@ -113,7 +113,7 @@ class TestTerraformCatchFireSimulation(unittest.TestCase):
         print("=" * 80)
         print(f"Status Quo Baseline Violations: {len(baseline_traj.all_violations)}")
         for step, inv, val, msg in baseline_traj.all_violations:
-            print(f"  🔥 Step {step}: {msg}")
+            print(f"  [VIOLATION] Step {step}: {msg}")
 
         print(f"\nRemediated Terraform Violations: {len(remediated_traj.all_violations)}")
         print(f"Remediated RDS Saturation at peak ASG: {remediated_traj.final_state.get_metric('rds_primary_rds', 'pool_saturation')*100:.1f}%")
@@ -132,7 +132,7 @@ class TestTerraformCatchFireSimulation(unittest.TestCase):
         self.assertTrue(remediated_traj.is_valid)
         self.assertEqual(len(remediated_traj.all_violations), 0)
         self.assertLess(remediated_traj.final_state.get_metric("rds_primary_rds", "pool_saturation"), 0.40)
-        print("✔ Terraform Catch Fire Test Passed: OmniSim caught the exact AWS RDS max_connections fire before deployment!")
+        print("[OK] Terraform Catch Fire Test Passed: OmniSim caught the exact AWS RDS max_connections fire before deployment!")
 
 
 if __name__ == "__main__":

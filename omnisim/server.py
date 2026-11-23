@@ -188,7 +188,7 @@ class OmniSimAPIServer(http.server.SimpleHTTPRequestHandler):
 
 
 def run_api_server(port: int = DEFAULT_PORT) -> None:
-    print(f"🚀 OmniSim Enterprise API Gateway online at http://localhost:{port}")
+    print(f"[ONLINE] OmniSim Enterprise API Gateway online at http://localhost:{port}")
     with socketserver.TCPServer(("", port), OmniSimAPIServer) as httpd:
         try:
             httpd.serve_forever()

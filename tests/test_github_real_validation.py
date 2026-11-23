@@ -94,7 +94,7 @@ class TestGitHubRealWorldValidation(unittest.TestCase):
 
         print(f"Status Quo Violations: {len(baseline_traj.all_violations)}")
         for step, inv, val, msg in baseline_traj.all_violations:
-            print(f"  🔥 Step {step}: {msg}")
+            print(f"  [VIOLATION] Step {step}: {msg}")
 
         # Assertions
         # 1. OmniSim MUST catch the exact failure reported in GitHub Issue #1459:
@@ -104,7 +104,7 @@ class TestGitHubRealWorldValidation(unittest.TestCase):
         # 2. Mitigated trajectory with connection pooling MUST survive with 0 violations:
         self.assertTrue(mitigated_traj.is_valid)
         self.assertEqual(len(mitigated_traj.all_violations), 0)
-        print("✔ k3s-io/k3s #1459 VALIDATED: OmniSim accurately caught 'Error 1040' and proved the connection pooling fix.")
+        print("[OK] k3s-io/k3s #1459 VALIDATED: OmniSim accurately caught 'Error 1040' and proved the connection pooling fix.")
 
     def test_deis_issue_4297_remaining_connection_slots(self):
         """Validates deis/deis Issue #4297.
@@ -171,7 +171,7 @@ class TestGitHubRealWorldValidation(unittest.TestCase):
 
         print(f"Status Quo Violations: {len(baseline_traj.all_violations)}")
         for step, inv, val, msg in baseline_traj.all_violations:
-            print(f"  🔥 Step {step}: {msg}")
+            print(f"  [VIOLATION] Step {step}: {msg}")
 
         # Assertions
         # 1. OmniSim MUST catch the exact failure reported in Deis Issue #4297:
@@ -184,7 +184,7 @@ class TestGitHubRealWorldValidation(unittest.TestCase):
         self.assertTrue(mitigated_traj.is_valid)
         self.assertEqual(len(mitigated_traj.all_violations), 0)
         self.assertLess(mitigated_traj.final_state.get_metric("rds_deis_controller_db", "pool_saturation"), 0.55)
-        print("✔ deis/deis #4297 VALIDATED: OmniSim caught the exact Step 1 failure and validated the sizing remediation.")
+        print("[OK] deis/deis #4297 VALIDATED: OmniSim caught the exact Step 1 failure and validated the sizing remediation.")
 
 
 if __name__ == "__main__":

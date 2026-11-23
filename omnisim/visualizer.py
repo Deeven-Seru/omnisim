@@ -28,49 +28,50 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <title>OmniSim | Universal Counterfactual Simulation Engine</title>
     <style>
         :root {
-            --bg: #090d16;
-            --card-bg: #111726;
-            --border: #1e293b;
-            --accent: #38bdf8;
-            --accent-glow: rgba(56, 189, 248, 0.2);
-            --danger: #ef4444;
-            --success: #10b981;
-            --text-main: #f8fafc;
-            --text-dim: #94a3b8;
+            --bg: #08080A;
+            --card-bg: #12110E;
+            --border: #2D2719;
+            --accent: #E5B942;
+            --accent-glow: rgba(229, 185, 66, 0.22);
+            --accent-bright: #FFF2B2;
+            --danger: #DC4444;
+            --success: #E5B942;
+            --text-main: #F8F5EE;
+            --text-dim: #9E937D;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; }
         body { background: var(--bg); color: var(--text-main); padding: 24px; }
         header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; }
-        .logo { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+        .logo { font-size: 24px; font-weight: 900; letter-spacing: 1.5px; color: #FFF; }
         .logo span { color: var(--accent); }
-        .badge { background: var(--accent-glow); color: var(--accent); padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; border: 1px solid var(--accent); }
+        .badge { background: #1C1912; color: var(--accent-bright); padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 1px; border: 1px solid var(--border); }
         .grid { display: grid; grid-template-columns: 340px 1fr; gap: 24px; }
         .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-        h2 { font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dim); margin-bottom: 16px; }
+        h2 { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: var(--accent); margin-bottom: 16px; }
         .control-group { margin-bottom: 18px; }
         label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-main); }
         input[type="range"] { width: 100%; accent-color: var(--accent); }
         .range-val { font-size: 12px; color: var(--accent); font-weight: bold; float: right; }
-        button { width: 100%; background: var(--accent); color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; }
-        button:hover { opacity: 0.9; box-shadow: 0 0 15px var(--accent-glow); }
-        .rec-box { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); border-radius: 8px; padding: 16px; margin-bottom: 24px; font-size: 14px; line-height: 1.5; color: #a7f3d0; }
+        button { width: 100%; background: linear-gradient(135deg, #FFF2B2, #E5B942 50%, #A67C1E 100%); color: #08080A; border: none; padding: 12px; border-radius: 8px; font-weight: 800; font-size: 13px; letter-spacing: 1px; cursor: pointer; transition: 0.2s; }
+        button:hover { opacity: 0.95; box-shadow: 0 0 18px var(--accent-glow); }
+        .rec-box { background: rgba(229, 185, 66, 0.08); border: 1px solid var(--accent); border-radius: 8px; padding: 16px; margin-bottom: 24px; font-size: 14px; line-height: 1.5; color: var(--accent-bright); }
         .timeline-card { border-left: 4px solid var(--border); padding: 14px; background: rgba(255,255,255,0.02); margin-bottom: 12px; border-radius: 0 8px 8px 0; }
-        .timeline-card.viable { border-color: var(--success); }
-        .timeline-card.failed { border-color: var(--danger); }
+        .timeline-card.viable { border-color: var(--accent); background: rgba(229, 185, 66, 0.04); }
+        .timeline-card.failed { border-color: var(--danger); background: rgba(220, 68, 68, 0.04); }
         .timeline-title { font-size: 15px; font-weight: 700; display: flex; justify-content: space-between; margin-bottom: 6px; }
         .metric-badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
-        .metric-badge.ok { background: rgba(16, 185, 129, 0.2); color: var(--success); }
-        .metric-badge.err { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .metric-badge.ok { background: rgba(229, 185, 66, 0.15); color: var(--accent-bright); border: 1px solid var(--accent); }
+        .metric-badge.err { background: rgba(220, 68, 68, 0.2); color: var(--danger); }
         .delta-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
         .delta-table td { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .delta-table td:last-child { text-align: right; font-weight: 600; }
-        pre { background: #000; padding: 12px; border-radius: 6px; font-size: 12px; overflow-x: auto; color: #38bdf8; margin-top: 10px; }
+        pre { background: #000; padding: 12px; border-radius: 6px; font-size: 12px; overflow-x: auto; color: var(--accent); border: 1px solid var(--border); margin-top: 10px; }
     </style>
 </head>
 <body>
     <header>
         <div class="logo">OMNI<span>SIM</span></div>
-        <div class="badge">NVIDIA BLACKWELL ACCELERATED // v0.1.0-SEED</div>
+        <div class="badge">SAC ENGINE // PRE-EXECUTION INVARIANT VERIFICATION</div>
     </header>
 
     <div class="grid">
@@ -248,7 +249,7 @@ class OmniSimServerHandler(http.server.SimpleHTTPRequestHandler):
 
 def start_visualizer(port: int = PORT) -> None:
     print(f"\n=======================================================")
-    print(f"🚀 OmniSim Interactive Visualizer live at:")
+    print(f"[ONLINE] OmniSim Interactive Visualizer live at:")
     print(f"   http://localhost:{port}")
     print(f"=======================================================\n")
     with socketserver.TCPServer(("", port), OmniSimServerHandler) as httpd:

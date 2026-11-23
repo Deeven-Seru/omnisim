@@ -26,7 +26,7 @@ def __():
         
     mo.md(
         r"""
-        # 🌐 OmniSim: Universal Counterfactual Simulation Engine
+        # OmniSim: Universal Counterfactual Simulation Engine
         ### *Beyond Autoregressive Token Prediction to Action-Conditioned World Simulation*
         
         Accelerated for **NVIDIA Blackwell / Hopper GPUs, Apple Silicon MPS, & Multi-Cloud Clusters**
