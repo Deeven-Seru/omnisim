@@ -87,7 +87,18 @@ def run_simulation_cmd(domain: str, horizon: int) -> None:
 
     candidate_trajs = []
     for act in candidate_actions:
-        traj = planner.simulate_trajectory(state, [act] + [Action.no_op()] * (horizon - 1), name=act.name)
+        if act.name == "Proactive Proportional Scaling (Gateway + DB)":
+            db_act = Action(
+                name="Scale DB (+80%)",
+                intervention_type=InterventionType.SCALE,
+                target_entity="database_cluster",
+                parameters={"metric": "capacity", "factor": 1.8},
+                cost=140.0,
+            )
+            traj = planner.simulate_trajectory(state, [act, db_act] + [Action.no_op()] * (horizon - 2), name=act.name)
+            traj.total_cost = act.cost + db_act.cost
+        else:
+            traj = planner.simulate_trajectory(state, [act] + [Action.no_op()] * (horizon - 1), name=act.name)
         candidate_trajs.append(traj)
 
     best_viable = next((t for t in candidate_trajs if t.is_valid), None)
