@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>OmniSim — Foundational Software for Infrastructure Survivability</title>
   <meta name="description" content="OmniSim delivers foundational software for mission-critical cloud infrastructure. Action-conditioned world models, causal ontology, and autonomous invariant defense.">
   <link rel="icon" type="image/svg+xml" href="assets/omnisim-icon.svg">
@@ -148,6 +148,55 @@
       transform: translateX(4px);
     }
 
+    /* Mobile Navigation Button */
+    .mobile-nav-toggle {
+      display: none;
+      background: transparent;
+      border: var(--hairline) solid color-mix(in srgb, var(--off-white) 25%, transparent);
+      border-radius: var(--r-control);
+      padding: 10px 12px;
+      cursor: pointer;
+      flex-direction: column;
+      gap: 5px;
+      justify-content: center;
+      align-items: center;
+      z-index: 101;
+    }
+    .mobile-nav-toggle .bar {
+      width: 22px;
+      height: 1.5px;
+      background: var(--off-white);
+      transition: transform 220ms ease, opacity 220ms ease;
+    }
+    .mobile-nav-toggle.is-active .bar:nth-child(1) {
+      transform: translateY(3.25px) rotate(45deg);
+    }
+    .mobile-nav-toggle.is-active .bar:nth-child(2) {
+      transform: translateY(-3.25px) rotate(-45deg);
+    }
+
+    /* Responsive Grid Column Helpers */
+    .col-phase { grid-column: span 3; }
+    .col-inv { grid-column: span 4; }
+    .col-bench { grid-column: span 4; }
+    .col-head { grid-column: span 9; }
+    .col-diff { grid-column: span 6; }
+
+    @media (max-width: 1024px) {
+      .col-phase { grid-column: span 6; }
+      .col-inv { grid-column: span 6; }
+      .col-bench { grid-column: span 6; }
+      .col-head { grid-column: span 12; }
+    }
+
+    @media (max-width: 768px) {
+      .col-phase { grid-column: span 12; }
+      .col-inv { grid-column: span 12; }
+      .col-bench { grid-column: span 12; }
+      .col-head { grid-column: span 12; }
+      .col-diff { grid-column: span 12; }
+    }
+
     /* Interactive Tab Switcher */
     .mode-tabs {
       display: inline-flex;
@@ -157,18 +206,21 @@
       padding: 4px;
       gap: 4px;
       margin-bottom: var(--space-s);
+      max-width: 100%;
+      overflow-x: auto;
     }
     .mode-tab {
       font-family: var(--font-mono);
       font-size: var(--fs-label);
       letter-spacing: var(--ls-label);
       text-transform: uppercase;
-      padding: 8px 16px;
+      padding: 10px 18px;
       border-radius: var(--r-pill);
       border: none;
       background: transparent;
       color: color-mix(in srgb, var(--off-white) 60%, transparent);
       cursor: pointer;
+      white-space: nowrap;
       transition: all 180ms ease;
     }
     .mode-tab:hover {
@@ -226,9 +278,9 @@
     }
     .slider-card input[type="range"] {
       width: 100%;
-      height: 4px;
+      height: 6px;
       background: color-mix(in srgb, var(--off-white) 20%, transparent);
-      border-radius: 2px;
+      border-radius: 3px;
       outline: none;
       -webkit-appearance: none;
       margin-top: 6px;
@@ -236,8 +288,8 @@
     }
     .slider-card input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 14px;
-      height: 14px;
+      width: 18px;
+      height: 18px;
       border-radius: var(--r-pill);
       background: var(--off-white);
       cursor: pointer;
@@ -267,6 +319,8 @@
       letter-spacing: var(--ls-label);
       text-transform: uppercase;
       color: color-mix(in srgb, var(--off-white) 60%, transparent);
+      flex-wrap: wrap;
+      gap: 8px;
     }
     #waveform-canvas {
       width: 100%;
@@ -349,9 +403,11 @@
       border-radius: var(--r-control);
       overflow-x: auto;
       background: var(--white);
+      -webkit-overflow-scrolling: touch;
     }
     .ops-table {
       width: 100%;
+      min-width: 680px;
       border-collapse: collapse;
       text-align: left;
       font-size: var(--fs-body-sm);
@@ -366,11 +422,13 @@
       padding: 14px 18px;
       border-bottom: var(--hairline) solid color-mix(in srgb, var(--ink) 14%, transparent);
       font-weight: 500;
+      white-space: nowrap;
     }
     .ops-table td {
       padding: 16px 18px;
       border-bottom: var(--hairline) solid color-mix(in srgb, var(--ink) 8%, transparent);
       color: var(--ink);
+      white-space: nowrap;
     }
     .ops-table tr {
       cursor: pointer;
@@ -441,6 +499,162 @@
       background: color-mix(in srgb, var(--paper) 60%, transparent);
     }
 
+    .chart-scroll-wrap {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .chart-scroll-wrap svg {
+      min-width: 650px;
+    }
+
+    /* Responsive Overrides */
+    @media (max-width: 820px) {
+      :root {
+        --fs-display-xl: clamp(34px, 8.5vw, 54px);
+        --fs-display-l: clamp(26px, 7vw, 38px);
+        --fs-display-m: clamp(22px, 5.5vw, 28px);
+        --fs-heading: clamp(19px, 4.5vw, 24px);
+        --space-section: 64px;
+        --space-m: 36px;
+        --gutter: 16px;
+        --nav-height: 72px;
+      }
+
+      .mobile-nav-toggle {
+        display: flex;
+      }
+
+      .site-nav {
+        padding-inline: 18px;
+      }
+      .site-nav .links {
+        display: flex !important;
+        position: fixed;
+        top: var(--nav-height);
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--surface-dark);
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 32px 24px;
+        gap: 20px;
+        border-top: var(--hairline) solid color-mix(in srgb, var(--off-white) 14%, transparent);
+        transform: translateY(-100%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 250ms ease, opacity 250ms ease;
+        z-index: 100;
+        overflow-y: auto;
+      }
+      .site-nav .links.is-open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .site-nav .links a {
+        font-size: 14px;
+        width: 100%;
+        padding-bottom: 12px;
+        border-bottom: var(--hairline) solid color-mix(in srgb, var(--off-white) 10%, transparent);
+      }
+      .site-nav .links .btn {
+        margin-top: 12px;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .hero.blueprint {
+        min-height: auto;
+        padding-top: calc(var(--nav-height) + 16px);
+        padding-bottom: var(--space-m);
+        display: block;
+      }
+      .hero .container {
+        padding-block: var(--space-m) !important;
+      }
+      .hero .bp-node {
+        display: none !important;
+      }
+      .iso-field-container {
+        opacity: 0.16 !important;
+        right: -35% !important;
+        transform: scale(0.6) !important;
+      }
+
+      .hero .glass.hero-telemetry {
+        position: static !important;
+        width: 100% !important;
+        margin-top: var(--space-m);
+        box-sizing: border-box;
+      }
+
+      .demo-row {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+      }
+      .demo-row .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .sim-console {
+        padding: 24px 18px !important;
+      }
+      .mode-tabs {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        border-radius: var(--r-control);
+      }
+      .mode-tab {
+        width: 100%;
+        text-align: center;
+      }
+
+      .metrics {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 20px !important;
+      }
+
+      .card.card-dark.cut-tr {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 20px !important;
+      }
+      .card.card-dark.cut-tr .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .site-foot .cols {
+        grid-template-columns: 1fr !important;
+        row-gap: 28px !important;
+      }
+
+      .ops-table-container {
+        margin-inline: -16px;
+        border-radius: 0;
+        border-left: 0;
+        border-right: 0;
+      }
+      .mobile-scroll-hint {
+        display: block !important;
+      }
+
+      #waveform-canvas {
+        height: 110px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .metrics {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
     /* Reducer reset */
     @media (prefers-reduced-motion: reduce) {
       .blueprint-scanline,
@@ -467,20 +681,27 @@
       <span class="name">OMNISIM</span>
       <span class="cn" style="font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--ls-label); text-transform: uppercase; opacity: 0.6;">WORLD MODEL</span>
     </div>
-    <div class="links">
-      <a href="#platforms">Platform</a>
-      <a href="#simulator">Simulation</a>
-      <a href="#ontology-table">Ontology Table</a>
-      <a href="#invariants">Invariants</a>
-      <a href="#outcomes">Outcomes</a>
-      <a href="#benchmarks">Benchmarks</a>
-      <a href="https://pypi.org/project/omnisim-engine/" target="_blank">PyPI</a>
+
+    <!-- Mobile Hamburger Toggle Button -->
+    <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation">
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+
+    <div class="links" id="navLinks">
+      <a href="#platforms" onclick="closeNav()">Platform</a>
+      <a href="#simulator" onclick="closeNav()">Simulation</a>
+      <a href="#ontology-table" onclick="closeNav()">Ontology Table</a>
+      <a href="#invariants" onclick="closeNav()">Invariants</a>
+      <a href="#outcomes" onclick="closeNav()">Outcomes</a>
+      <a href="#benchmarks" onclick="closeNav()">Benchmarks</a>
+      <a href="https://pypi.org/project/omnisim-engine/" target="_blank">PyPI Distribution</a>
       <a href="https://github.com/Deeven-Seru/omnisim" target="_blank" class="btn btn-secondary" style="padding:10px 18px">Deploy Engine <span class="arrow"></span></a>
     </div>
   </nav>
 
   <!-- HERO SECTION -->
-  <header class="hero blueprint" style="min-height:92vh; display:flex; align-items:flex-end;">
+  <header class="hero blueprint">
     <div class="blueprint-scanline"></div>
     <span class="ring-bleed"></span>
 
@@ -494,27 +715,10 @@
       </div>
     </div>
 
-    <!-- Signature glowing wireframe node chips -->
+    <!-- Signature glowing wireframe node chips (hidden on mobile to prevent text occlusion) -->
     <span class="bp-node blue" style="position:absolute; top:22%; right:31%">Ontology Kernel &middot; Causal DAG</span>
     <span class="bp-node" style="position:absolute; top:42%; right:14%">Horizon Model &middot; S(t+1)</span>
     <span class="bp-node blue" style="position:absolute; top:62%; right:38%">Titan Synthesis &middot; Zero Invariant Breach</span>
-
-    <!-- Frosted-glass instrument panel -->
-    <div class="glass" style="position:absolute; top:20%; right:5%; width:276px; padding:22px; border-radius:var(--r-control)">
-      <div style="display:flex; align-items:center; justify-content:space-between">
-        <span class="t-label">Telemetry Status</span>
-        <span class="pulse-dot"></span>
-      </div>
-      <div style="display:flex; align-items:baseline; gap:10px; margin-top:12px">
-        <span class="t-display-m" style="color:var(--off-white)">3,400+</span>
-        <span class="t-label">nodes active</span>
-      </div>
-      <hr class="rule" style="margin:14px 0">
-      <div style="display:flex; align-items:center; gap:8px">
-        <span class="ring" style="width:8px; background:color-mix(in srgb, var(--accent-blue) 70%, transparent); border-color:var(--accent-blue)"></span>
-        <span class="t-label">Lineage 99.99% &middot; Invariant 100%</span>
-      </div>
-    </div>
 
     <div class="container reveal" style="padding-block:var(--space-section)">
       <div class="earmark t-label" style="margin-bottom:var(--space-m)">
@@ -530,6 +734,23 @@
         <a href="#simulator" class="btn btn-primary">Launch Mission Control <span class="arrow"></span></a>
         <a href="#platforms" class="btn btn-secondary">Explore Architecture</a>
       </div>
+
+      <!-- Frosted-glass instrument panel (Responsive on mobile) -->
+      <div class="glass hero-telemetry" style="position:absolute; top:20%; right:5%; width:276px; padding:22px; border-radius:var(--r-control)">
+        <div style="display:flex; align-items:center; justify-content:space-between">
+          <span class="t-label">Telemetry Status</span>
+          <span class="pulse-dot"></span>
+        </div>
+        <div style="display:flex; align-items:baseline; gap:10px; margin-top:12px">
+          <span class="t-display-m" style="color:var(--off-white)">3,400+</span>
+          <span class="t-label">nodes active</span>
+        </div>
+        <hr class="rule" style="margin:14px 0">
+        <div style="display:flex; align-items:center; gap:8px">
+          <span class="ring" style="width:8px; background:color-mix(in srgb, var(--accent-blue) 70%, transparent); border-color:var(--accent-blue)"></span>
+          <span class="t-label">Lineage 99.99% &middot; Invariant 100%</span>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -537,7 +758,7 @@
   <section class="on-white section" id="platforms">
     <div class="container">
       <div class="grid-12" style="margin-bottom:var(--space-m)">
-        <div style="grid-column: span 9" class="reveal">
+        <div class="col-head reveal">
           <span class="t-label">02 ——→ Architectural Foundation</span>
           <h2 class="t-display-m" style="margin-top:var(--space-s)">One causal model. Every dependency. Zero blind spots.</h2>
           <p class="t-body" style="color:var(--text-medium); margin-top:var(--space-xs); max-width:64ch">
@@ -546,9 +767,9 @@
         </div>
       </div>
 
-      <!-- Palantir signature 4-state Marketecture Phase Boxes -->
+      <!-- Palantir signature 4-state Marketecture Phase Boxes (Responsive Grid) -->
       <div class="grid-12" style="row-gap:var(--gutter); margin-bottom:var(--space-m)">
-        <div style="grid-column: span 3" class="reveal stagger-1">
+        <div class="col-phase reveal stagger-1">
           <div class="phase phase-solid">
             <span class="lbl">Stage 01 &middot; Solid</span>
             <h4 class="t-title" style="margin-bottom:8px">Declarative Ingestion</h4>
@@ -556,7 +777,7 @@
           </div>
         </div>
 
-        <div style="grid-column: span 3" class="reveal stagger-2">
+        <div class="col-phase reveal stagger-2">
           <div class="phase phase-dashed">
             <span class="lbl">Stage 02 &middot; Dashed</span>
             <h4 class="t-title" style="margin-bottom:8px">Causal Compilation</h4>
@@ -564,7 +785,7 @@
           </div>
         </div>
 
-        <div style="grid-column: span 3" class="reveal stagger-3">
+        <div class="col-phase reveal stagger-3">
           <div class="phase phase-striped">
             <span class="lbl">Stage 03 &middot; Striped</span>
             <h4 class="t-title" style="margin-bottom:8px">Forward Search</h4>
@@ -572,7 +793,7 @@
           </div>
         </div>
 
-        <div style="grid-column: span 3" class="reveal stagger-4">
+        <div class="col-phase reveal stagger-4">
           <div class="phase phase-filled">
             <span class="lbl">Stage 04 &middot; Filled</span>
             <h4 class="t-title" style="margin-bottom:8px">Titan Enforcement</h4>
@@ -685,21 +906,21 @@
         <div id="graph-box" style="display:none; padding:24px; border:var(--hairline) solid color-mix(in srgb, var(--off-white) 14%, transparent); border-radius:var(--r-control); background:#060709; margin-bottom:var(--space-m);">
           <div class="t-label" style="color:var(--off-white); margin-bottom:14px">Topology Hierarchy &middot; Relational Dependency Chain</div>
           <div style="display:flex; flex-direction:column; gap:12px; font-family:var(--font-mono); font-size:12px;">
-            <div style="padding:14px; background:var(--surface-dark); border:1px solid color-mix(in srgb, var(--off-white) 16%, transparent); border-radius:6px; display:flex; justify-content:space-between;">
+            <div style="padding:14px; background:var(--surface-dark); border:1px solid color-mix(in srgb, var(--off-white) 16%, transparent); border-radius:6px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
               <span>[ENTITY 01] Edge Envoy Ingress Cluster</span>
               <span style="opacity:0.65">ACTIVE: 12,000 QPS CEILING</span>
             </div>
-            <div style="padding-left:24px; color:var(--off-white); font-size:11px;">
+            <div style="padding-left:14px; color:var(--off-white); font-size:11px;">
               &darr; DIRECT FANOUT &middot; RATIO: 18 THREADS / REPLICA
             </div>
-            <div style="padding:14px; background:var(--surface-dark); border:1px solid color-mix(in srgb, var(--off-white) 16%, transparent); border-radius:6px; display:flex; justify-content:space-between;">
+            <div style="padding:14px; background:var(--surface-dark); border:1px solid color-mix(in srgb, var(--off-white) 16%, transparent); border-radius:6px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
               <span>[ENTITY 02] Checkout Service Autoscaling Group (EKS)</span>
               <span style="opacity:0.65">NODES: 8 CURRENT | 28 BURST CAP</span>
             </div>
-            <div style="padding-left:24px; color:var(--off-white); font-size:11px;">
+            <div style="padding-left:14px; color:var(--off-white); font-size:11px;">
               &darr; INVARIANT BOUND: pool_saturation &le; 0.85
             </div>
-            <div style="padding:14px; background:color-mix(in srgb, var(--accent-blue) 12%, var(--surface-dark)); border:1px solid color-mix(in srgb, var(--accent-blue) 60%, transparent); border-radius:6px; display:flex; justify-content:space-between;">
+            <div style="padding:14px; background:color-mix(in srgb, var(--accent-blue) 12%, var(--surface-dark)); border:1px solid color-mix(in srgb, var(--accent-blue) 60%, transparent); border-radius:6px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
               <span style="color:var(--off-white)">[ENTITY 03] Relational Datastore (Aurora PostgreSQL)</span>
               <span style="color:var(--off-white)">CAPACITY: 1,365 MAX SOCKS (r6g tier)</span>
             </div>
@@ -710,7 +931,7 @@
         <div id="diff-box" style="display:none; padding:24px; border:var(--hairline) solid color-mix(in srgb, var(--off-white) 14%, transparent); border-radius:var(--r-control); background:#060709; margin-bottom:var(--space-m);">
           <div class="t-label" style="color:var(--off-white); margin-bottom:14px">Titan Remediation Synthesis &middot; Pre-Execution Proof</div>
           <div class="grid-12" style="row-gap:var(--space-s)">
-            <div style="grid-column: span 6">
+            <div class="col-diff">
               <div style="padding:18px; border:1px solid color-mix(in srgb, #FF4444 35%, transparent); background:color-mix(in srgb, #FF4444 6%, var(--surface-dark)); border-radius:6px;">
                 <div class="t-label" style="color:#FF7777; margin-bottom:8px">Vulnerable Candidate State (PR #1482)</div>
                 <div style="font-family:var(--font-mono); font-size:12px; line-height:1.7;">
@@ -721,7 +942,7 @@
                 </div>
               </div>
             </div>
-            <div style="grid-column: span 6">
+            <div class="col-diff">
               <div style="padding:18px; border:1px solid color-mix(in srgb, var(--off-white) 50%, transparent); background:color-mix(in srgb, var(--surface-navy) 60%, var(--surface-dark)); border-radius:6px;">
                 <div class="t-label" style="color:var(--off-white); margin-bottom:8px">Synthesized Remediation State (Titan)</div>
                 <div style="font-family:var(--font-mono); font-size:12px; line-height:1.7;">
@@ -810,6 +1031,7 @@
         <p class="t-body" style="color:var(--text-medium); margin-top:var(--space-xs); max-width:68ch">
           Inspect live infrastructure entities modeled in the causal graph. Each object maintains explicit physical bounds, upstream callers, downstream sinks, and invariant validation status.
         </p>
+        <span class="t-label mobile-scroll-hint" style="display:none; color:var(--text-medium); margin-top:10px">Swipe horizontally to inspect full table &rarr;</span>
       </div>
 
       <div class="ops-table-container reveal stagger-1" style="margin-top:var(--space-m)">
@@ -876,8 +1098,8 @@
             <span class="t-label" id="inspect-id">INF-ASG-01 &middot; Lineage Inspector</span>
             <h4 class="t-title" id="inspect-title" style="color:var(--off-white); margin-top:4px">Checkout API Compute Cluster</h4>
           </div>
-          <div style="display:flex; gap:16px; align-items:center">
-            <span class="t-label" id="inspect-tier">AWS EKS c6g.2xlarge</span>
+          <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap">
+            <span class="t-label" id="inspect-tier">AWS EKS c6g.2xlarge &middot; 28 worker nodes max</span>
             <span class="pill" id="inspect-status" style="border-color:var(--off-white); background:var(--off-white); color:var(--ink)">COMPLIANT &middot; ZERO BREACH</span>
           </div>
         </div>
@@ -906,7 +1128,7 @@
       </div>
 
       <div class="grid-12" style="row-gap:var(--gutter); margin-top:var(--space-m)">
-        <div style="grid-column: span 4" class="reveal stagger-1">
+        <div class="col-inv reveal stagger-1">
           <div class="invariant-card" style="height:100%">
             <div>
               <span class="inv-bound">INV-01 &middot; Connection Headroom</span>
@@ -921,7 +1143,7 @@
           </div>
         </div>
 
-        <div style="grid-column: span 4" class="reveal stagger-2">
+        <div class="col-inv reveal stagger-2">
           <div class="invariant-card" style="height:100%">
             <div>
               <span class="inv-bound">INV-02 &middot; Concurrency Bound</span>
@@ -936,7 +1158,7 @@
           </div>
         </div>
 
-        <div style="grid-column: span 4" class="reveal stagger-3">
+        <div class="col-inv reveal stagger-3">
           <div class="invariant-card" style="height:100%">
             <div>
               <span class="inv-bound">INV-03 &middot; Cascading Dampening</span>
@@ -951,7 +1173,7 @@
           </div>
         </div>
 
-        <div style="grid-column: span 4" class="reveal stagger-1">
+        <div class="col-inv reveal stagger-1">
           <div class="invariant-card" style="height:100%">
             <div>
               <span class="inv-bound">INV-04 &middot; Memory Headroom</span>
@@ -966,7 +1188,7 @@
           </div>
         </div>
 
-        <div style="grid-column: span 4" class="reveal stagger-2">
+        <div class="col-inv reveal stagger-2">
           <div class="invariant-card" style="height:100%">
             <div>
               <span class="inv-bound">INV-05 &middot; Quorum Survivability</span>
@@ -981,7 +1203,7 @@
           </div>
         </div>
 
-        <div style="grid-column: span 4" class="reveal stagger-3">
+        <div class="col-inv reveal stagger-3">
           <div class="invariant-card" style="height:100%">
             <div>
               <span class="inv-bound">INV-06 &middot; Acyclic Dependency</span>
@@ -1022,7 +1244,7 @@
         </div>
       </div>
 
-      <!-- Hairline SVG Deck Comparison Chart -->
+      <!-- Hairline SVG Deck Comparison Chart with Mobile Scroll Wrap -->
       <div class="card card-dark reveal stagger-2" style="margin-top:var(--space-m); padding:36px 40px">
         <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:var(--space-m); flex-wrap:wrap; gap:12px">
           <div>
@@ -1032,34 +1254,36 @@
           <span class="t-label" style="color:var(--off-white)">Minutes Before Incident Impact</span>
         </div>
 
-        <svg viewBox="0 0 1000 240" width="100%" style="display:block; overflow:visible; font-family:'Apercu Mono Pro', ui-monospace, monospace; font-weight:500">
-          <!-- Background gridlines -->
-          <line x1="120" y1="30" x2="950" y2="30" stroke="rgba(239, 239, 239, 0.12)" stroke-width="1" />
-          <line x1="120" y1="90" x2="950" y2="90" stroke="rgba(239, 239, 239, 0.12)" stroke-width="1" />
-          <line x1="120" y1="150" x2="950" y2="150" stroke="rgba(239, 239, 239, 0.12)" stroke-width="1" />
-          <line x1="120" y1="210" x2="950" y2="210" stroke="rgba(239, 239, 239, 0.25)" stroke-width="1" />
+        <div class="chart-scroll-wrap">
+          <svg viewBox="0 0 1000 240" width="100%" style="display:block; overflow:visible; font-family:'Apercu Mono Pro', ui-monospace, monospace; font-weight:500">
+            <!-- Background gridlines -->
+            <line x1="120" y1="30" x2="950" y2="30" stroke="rgba(239, 239, 239, 0.12)" stroke-width="1" />
+            <line x1="120" y1="90" x2="950" y2="90" stroke="rgba(239, 239, 239, 0.12)" stroke-width="1" />
+            <line x1="120" y1="150" x2="950" y2="150" stroke="rgba(239, 239, 239, 0.12)" stroke-width="1" />
+            <line x1="120" y1="210" x2="950" y2="210" stroke="rgba(239, 239, 239, 0.25)" stroke-width="1" />
 
-          <!-- Y-axis Labels -->
-          <text x="105" y="36" fill="#A0A2A6" font-size="12" text-anchor="end">+10m Lead</text>
-          <text x="105" y="96" fill="#A0A2A6" font-size="12" text-anchor="end">+5m Lead</text>
-          <text x="105" y="156" fill="#A0A2A6" font-size="12" text-anchor="end">+1m Lead</text>
-          <text x="105" y="215" fill="#A0A2A6" font-size="12" text-anchor="end">0s Outage</text>
+            <!-- Y-axis Labels -->
+            <text x="105" y="36" fill="#A0A2A6" font-size="12" text-anchor="end">+10m Lead</text>
+            <text x="105" y="96" fill="#A0A2A6" font-size="12" text-anchor="end">+5m Lead</text>
+            <text x="105" y="156" fill="#A0A2A6" font-size="12" text-anchor="end">+1m Lead</text>
+            <text x="105" y="215" fill="#A0A2A6" font-size="12" text-anchor="end">0s Outage</text>
 
-          <!-- Bar 1: Static Linters -->
-          <rect x="220" y="206" width="120" height="4" fill="none" stroke="#EFEFEF" stroke-width="1" />
-          <text x="280" y="232" fill="#EFEFEF" font-size="11" text-anchor="middle">STATIC LINTERS</text>
-          <text x="280" y="196" fill="#A0A2A6" font-size="11" text-anchor="middle">0m (Syntax Only)</text>
+            <!-- Bar 1: Static Linters -->
+            <rect x="220" y="206" width="120" height="4" fill="none" stroke="#EFEFEF" stroke-width="1" />
+            <text x="280" y="232" fill="#EFEFEF" font-size="11" text-anchor="middle">STATIC LINTERS</text>
+            <text x="280" y="196" fill="#A0A2A6" font-size="11" text-anchor="middle">0m (Syntax Only)</text>
 
-          <!-- Bar 2: APM Observability (Post-Incident Alert) -->
-          <rect x="460" y="200" width="120" height="10" fill="none" stroke="#EFEFEF" stroke-width="1" />
-          <text x="520" y="232" fill="#EFEFEF" font-size="11" text-anchor="middle">APM / LOGGING</text>
-          <text x="520" y="190" fill="#A0A2A6" font-size="11" text-anchor="middle">+0s (Post-Outage)</text>
+            <!-- Bar 2: APM Observability (Post-Incident Alert) -->
+            <rect x="460" y="200" width="120" height="10" fill="none" stroke="#EFEFEF" stroke-width="1" />
+            <text x="520" y="232" fill="#EFEFEF" font-size="11" text-anchor="middle">APM / LOGGING</text>
+            <text x="520" y="190" fill="#A0A2A6" font-size="11" text-anchor="middle">+0s (Post-Outage)</text>
 
-          <!-- Bar 3: OmniSim Continuous Invariant Gatekeeper -->
-          <rect x="700" y="30" width="140" height="180" fill="#EFEFEF" />
-          <text x="770" y="232" fill="#EFEFEF" font-size="11" text-anchor="middle">OMNISIM ENGINE</text>
-          <text x="770" y="22" fill="#EFEFEF" font-size="12" text-anchor="middle">+10 MIN PRE-MERGE</text>
-        </svg>
+            <!-- Bar 3: OmniSim Continuous Invariant Gatekeeper -->
+            <rect x="700" y="30" width="140" height="180" fill="#EFEFEF" />
+            <text x="770" y="232" fill="#EFEFEF" font-size="11" text-anchor="middle">OMNISIM ENGINE</text>
+            <text x="770" y="22" fill="#EFEFEF" font-size="12" text-anchor="middle">+10 MIN PRE-MERGE</text>
+          </svg>
+        </div>
       </div>
 
       <!-- Signature Palantir chamfered (异形) callout card -->
@@ -1084,7 +1308,7 @@
       <h2 class="t-display-m reveal" style="margin-bottom:var(--space-m)">Empirical proof across mission-critical workloads.</h2>
 
       <div class="grid-12" style="row-gap:var(--gutter)">
-        <div style="grid-column: span 4" class="reveal stagger-1">
+        <div class="col-bench reveal stagger-1">
           <div class="benchmark-card" style="height:100%">
             <div>
               <span class="t-label">Numenta Anomaly Benchmark (NAB)</span>
@@ -1099,7 +1323,7 @@
           </div>
         </div>
 
-        <div style="grid-column: span 4" class="reveal stagger-2">
+        <div class="col-bench reveal stagger-2">
           <div class="benchmark-card" style="height:100%">
             <div>
               <span class="t-label">Google Cloud Online Boutique</span>
@@ -1114,7 +1338,7 @@
           </div>
         </div>
 
-        <div style="grid-column: span 4" class="reveal stagger-3">
+        <div class="col-bench reveal stagger-3">
           <div class="benchmark-card" style="height:100%">
             <div>
               <span class="t-label">Streaming State Graph</span>
@@ -1206,7 +1430,7 @@
     </div>
   </footer>
 
-  <!-- SCRIPT: Scroll Reveals, Metric Counters, Interactive Mode Switcher, Oscilloscope, Particle Topology -->
+  <!-- SCRIPT: Mobile Navigation, Scroll Reveals, Metric Counters, Interactive Mode Switcher, Oscilloscope, Particle Topology -->
   <script>
     // Arm reveal
     document.documentElement.classList.add('js');
@@ -1222,6 +1446,31 @@
         nav.classList.add('nav-glass');
       }
     });
+
+    // Mobile Navigation Toggle
+    const mobileNavToggle = document.getElementById('mobileNavToggle');
+    const navLinks = document.getElementById('navLinks');
+
+    if (mobileNavToggle && navLinks) {
+      mobileNavToggle.addEventListener('click', () => {
+        const isOpen = navLinks.classList.contains('is-open');
+        if (isOpen) {
+          closeNav();
+        } else {
+          navLinks.classList.add('is-open');
+          mobileNavToggle.classList.add('is-active');
+          document.body.style.overflow = 'hidden';
+        }
+      });
+    }
+
+    function closeNav() {
+      if (navLinks && mobileNavToggle) {
+        navLinks.classList.remove('is-open');
+        mobileNavToggle.classList.remove('is-active');
+        document.body.style.overflow = '';
+      }
+    }
 
     // Fire-once IntersectionObserver for reveals
     const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1241,7 +1490,7 @@
             counters.forEach(animateCounter);
           }
         });
-      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.1 });
+      }, { rootMargin: '0px 0px -6% 0px', threshold: 0.08 });
 
       revealEls.forEach(el => observer.observe(el));
     }
@@ -1316,7 +1565,7 @@
 
     function initParticles() {
       particles = [];
-      const count = Math.floor((width * height) / 28000);
+      const count = Math.min(80, Math.floor((width * height) / 28000));
       for (let i = 0; i < count; i++) {
         particles.push({
           x: Math.random() * width,
@@ -1347,8 +1596,8 @@
         for (let j = i + 1; j < particles.length; j++) {
           const p2 = particles[j];
           const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-          if (dist < 130) {
-            ctx.strokeStyle = `rgba(239, 239, 239, ${0.12 * (1 - dist / 130)})`;
+          if (dist < 110) {
+            ctx.strokeStyle = `rgba(239, 239, 239, ${0.10 * (1 - dist / 110)})`;
             ctx.lineWidth = 0.8;
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
@@ -1376,13 +1625,13 @@
       // Gridlines
       waveCtx.strokeStyle = 'rgba(239, 239, 239, 0.08)';
       waveCtx.lineWidth = 1;
-      for (let x = 0; x < w; x += 40) {
+      for (let x = 0; x < w; x += 36) {
         waveCtx.beginPath();
         waveCtx.moveTo(x, 0);
         waveCtx.lineTo(x, h);
         waveCtx.stroke();
       }
-      for (let y = 0; y < h; y += 30) {
+      for (let y = 0; y < h; y += 26) {
         waveCtx.beginPath();
         waveCtx.moveTo(0, y);
         waveCtx.lineTo(w, y);
@@ -1395,7 +1644,7 @@
       waveCtx.lineWidth = 1.5;
       for (let x = 0; x < w; x++) {
         const factor = (x / w) * traffic * 1.5;
-        const y = (h / 2) + Math.sin(x * 0.04 + wavePhase) * (18 * factor) + (Math.random() - 0.5) * (4 * factor);
+        const y = (h / 2) + Math.sin(x * 0.04 + wavePhase) * (16 * factor) + (Math.random() - 0.5) * (3 * factor);
         if (x === 0) waveCtx.moveTo(x, y);
         else waveCtx.lineTo(x, y);
       }
@@ -1406,7 +1655,7 @@
       waveCtx.strokeStyle = 'rgba(239, 239, 239, 0.9)';
       waveCtx.lineWidth = 2;
       for (let x = 0; x < w; x++) {
-        const y = (h / 2) + Math.sin(x * 0.05 + wavePhase * 1.5) * 8;
+        const y = (h / 2) + Math.sin(x * 0.05 + wavePhase * 1.5) * 7;
         if (x === 0) waveCtx.moveTo(x, y);
         else waveCtx.lineTo(x, y);
       }
