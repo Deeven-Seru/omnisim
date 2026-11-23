@@ -74,24 +74,51 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* 3D Isometric Field & Tile Animations */
-    .iso-field-container {
-      position: absolute;
-      inset: 0;
+    /* Hero Two-Column Architectural Grid */
+    .col-hero-left {
+      grid-column: span 7;
+      z-index: 2;
+    }
+    .col-hero-right {
+      grid-column: span 5;
+      z-index: 2;
+    }
+
+    /* Hero Right Visual Cluster (Zero Overlap Encapsulation) */
+    .hero-instrument-cluster {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: flex-end;
+      width: 100%;
+    }
+
+    .hero-telemetry-panel {
+      width: 100%;
+      max-width: 340px;
+      padding: 22px;
+      border-radius: var(--r-control);
+    }
+
+    .hero-iso-viewport {
+      position: relative;
+      width: 100%;
+      height: 200px;
       display: flex;
       align-items: center;
-      justify-content: flex-end;
-      padding-right: 8%;
+      justify-content: center;
+      overflow: visible;
       pointer-events: none;
-      z-index: 1;
     }
     .iso-field {
       animation: iso-float 10s ease-in-out infinite;
       opacity: 0.88;
+      transform: scale(0.85) rotateX(55deg) rotateZ(45deg);
     }
     @keyframes iso-float {
-      0%, 100% { transform: scale(0.95) rotateX(55deg) rotateZ(45deg) translateZ(0px); }
-      50% { transform: scale(0.95) rotateX(55deg) rotateZ(45deg) translateZ(12px); }
+      0%, 100% { transform: scale(0.85) rotateX(55deg) rotateZ(45deg) translateZ(0px); }
+      50% { transform: scale(0.85) rotateX(55deg) rotateZ(45deg) translateZ(12px); }
     }
     .iso-tile.raise {
       animation: tile-breathe 6s ease-in-out infinite;
@@ -99,6 +126,14 @@
     @keyframes tile-breathe {
       0%, 100% { transform: translateZ(20px); }
       50% { transform: translateZ(32px); }
+    }
+
+    .hero-chips-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+      width: 100%;
     }
 
     /* Glowing Node Chips Pulse */
@@ -187,6 +222,15 @@
       .col-inv { grid-column: span 6; }
       .col-bench { grid-column: span 6; }
       .col-head { grid-column: span 12; }
+    }
+
+    @media (max-width: 960px) {
+      .col-hero-left { grid-column: span 12 !important; }
+      .col-hero-right { grid-column: span 12 !important; margin-top: var(--space-s); }
+      .hero-instrument-cluster { align-items: flex-start; }
+      .hero-chips-stack { align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
+      .hero-telemetry-panel { max-width: 100%; }
+      .hero-iso-viewport { height: 160px; }
     }
 
     @media (max-width: 768px) {
@@ -574,21 +618,6 @@
       .hero .container {
         padding-block: var(--space-m) !important;
       }
-      .hero .bp-node {
-        display: none !important;
-      }
-      .iso-field-container {
-        opacity: 0.16 !important;
-        right: -35% !important;
-        transform: scale(0.6) !important;
-      }
-
-      .hero .glass.hero-telemetry {
-        position: static !important;
-        width: 100% !important;
-        margin-top: var(--space-m);
-        box-sizing: border-box;
-      }
 
       .demo-row {
         flex-direction: column;
@@ -700,56 +729,72 @@
     </div>
   </nav>
 
-  <!-- HERO SECTION -->
-  <header class="hero blueprint">
+  <!-- HERO SECTION (Strict Two-Column Layout Eliminating Overlaps) -->
+  <header class="hero blueprint" style="min-height:88vh; display:flex; align-items:center;">
     <div class="blueprint-scanline"></div>
     <span class="ring-bleed"></span>
 
-    <!-- Signature 3D isometric blueprint data-plane -->
-    <div class="iso-field-container">
-      <div class="iso-field">
-        <div class="iso-tile"></div><div class="iso-tile b raise"></div><div class="iso-tile"></div><div class="iso-tile b"></div>
-        <div class="iso-tile b"></div><div class="iso-tile"></div><div class="iso-tile b raise"></div><div class="iso-tile"></div>
-        <div class="iso-tile"></div><div class="iso-tile b"></div><div class="iso-tile"></div><div class="iso-tile b"></div>
-        <div class="iso-tile b raise"></div><div class="iso-tile"></div><div class="iso-tile b"></div><div class="iso-tile"></div>
-      </div>
-    </div>
-
-    <!-- Signature glowing wireframe node chips (hidden on mobile to prevent text occlusion) -->
-    <span class="bp-node blue" style="position:absolute; top:22%; right:31%">Ontology Kernel &middot; Causal DAG</span>
-    <span class="bp-node" style="position:absolute; top:42%; right:14%">Horizon Model &middot; S(t+1)</span>
-    <span class="bp-node blue" style="position:absolute; top:62%; right:38%">Titan Synthesis &middot; Zero Invariant Breach</span>
-
-    <div class="container reveal" style="padding-block:var(--space-section)">
-      <div class="earmark t-label" style="margin-bottom:var(--space-m)">
-        <span style="color:var(--off-white)">01</span><span class="arrow"></span><span>The Foundational World Model</span>
-      </div>
-      <h1 class="t-display-xl" style="color:var(--off-white); max-width:16ch">
-        Simulate the future of infrastructure <span class="u-emph">before execution</span>.
-      </h1>
-      <p class="t-title" style="color:color-mix(in srgb, var(--off-white) 66%, transparent); max-width:620px; margin-top:var(--space-m)">
-        OmniSim unifies static architecture declarations, live runtime metrics, and physical constraints into an action-conditioned digital twin. Forecast latency cascades, stress test limits, and eliminate outages in CI.
-      </p>
-      <div class="demo-row" style="display:flex; gap:var(--space-s); margin-top:var(--space-m); flex-wrap:wrap">
-        <a href="#simulator" class="btn btn-primary">Launch Mission Control <span class="arrow"></span></a>
-        <a href="#platforms" class="btn btn-secondary">Explore Architecture</a>
-      </div>
-
-      <!-- Frosted-glass instrument panel (Responsive on mobile) -->
-      <div class="glass hero-telemetry" style="position:absolute; top:20%; right:5%; width:276px; padding:22px; border-radius:var(--r-control)">
-        <div style="display:flex; align-items:center; justify-content:space-between">
-          <span class="t-label">Telemetry Status</span>
-          <span class="pulse-dot"></span>
+    <div class="container reveal" style="padding-block:var(--space-section); width:100%;">
+      <div class="grid-12" style="align-items:center; row-gap:var(--space-m);">
+        
+        <!-- Left Column: Copy & Actions (Completely Unobstructed) -->
+        <div class="col-hero-left">
+          <div class="earmark t-label" style="margin-bottom:var(--space-m)">
+            <span style="color:var(--off-white)">01</span><span class="arrow"></span><span>The Foundational World Model</span>
+          </div>
+          <h1 class="t-display-xl" style="color:var(--off-white); max-width:14ch">
+            Simulate the future of infrastructure <span class="u-emph">before execution</span>.
+          </h1>
+          <p class="t-title" style="color:color-mix(in srgb, var(--off-white) 66%, transparent); max-width:540px; margin-top:var(--space-m)">
+            OmniSim unifies static architecture declarations, live runtime metrics, and physical constraints into an action-conditioned digital twin. Forecast latency cascades, stress test limits, and eliminate outages in CI.
+          </p>
+          <div class="demo-row" style="display:flex; gap:var(--space-s); margin-top:var(--space-m); flex-wrap:wrap">
+            <a href="#simulator" class="btn btn-primary">Launch Mission Control <span class="arrow"></span></a>
+            <a href="#platforms" class="btn btn-secondary">Explore Architecture</a>
+          </div>
         </div>
-        <div style="display:flex; align-items:baseline; gap:10px; margin-top:12px">
-          <span class="t-display-m" style="color:var(--off-white)">3,400+</span>
-          <span class="t-label">nodes active</span>
+
+        <!-- Right Column: Encapsulated Visual Instrument Cluster (Zero Text Overlap) -->
+        <div class="col-hero-right">
+          <div class="hero-instrument-cluster">
+            
+            <!-- Frosted-glass instrument panel -->
+            <div class="glass hero-telemetry-panel">
+              <div style="display:flex; align-items:center; justify-content:space-between">
+                <span class="t-label">Telemetry Status</span>
+                <span class="pulse-dot"></span>
+              </div>
+              <div style="display:flex; align-items:baseline; gap:10px; margin-top:12px">
+                <span class="t-display-m" style="color:var(--off-white)">3,400+</span>
+                <span class="t-label">nodes active</span>
+              </div>
+              <hr class="rule" style="margin:14px 0">
+              <div style="display:flex; align-items:center; gap:8px">
+                <span class="ring" style="width:8px; background:color-mix(in srgb, var(--accent-blue) 70%, transparent); border-color:var(--accent-blue)"></span>
+                <span class="t-label">Lineage 99.99% &middot; Invariant 100%</span>
+              </div>
+            </div>
+
+            <!-- 3D Isometric blueprint data-plane -->
+            <div class="hero-iso-viewport">
+              <div class="iso-field">
+                <div class="iso-tile"></div><div class="iso-tile b raise"></div><div class="iso-tile"></div><div class="iso-tile b"></div>
+                <div class="iso-tile b"></div><div class="iso-tile"></div><div class="iso-tile b raise"></div><div class="iso-tile"></div>
+                <div class="iso-tile"></div><div class="iso-tile b"></div><div class="iso-tile"></div><div class="iso-tile b"></div>
+                <div class="iso-tile b raise"></div><div class="iso-tile"></div><div class="iso-tile b"></div><div class="iso-tile"></div>
+              </div>
+            </div>
+
+            <!-- Glowing wireframe node chips inside the visual cluster -->
+            <div class="hero-chips-stack">
+              <span class="bp-node blue">Ontology Kernel &middot; Causal DAG</span>
+              <span class="bp-node">Horizon Model &middot; S(t+1)</span>
+              <span class="bp-node blue">Titan Synthesis &middot; Zero Invariant Breach</span>
+            </div>
+
+          </div>
         </div>
-        <hr class="rule" style="margin:14px 0">
-        <div style="display:flex; align-items:center; gap:8px">
-          <span class="ring" style="width:8px; background:color-mix(in srgb, var(--accent-blue) 70%, transparent); border-color:var(--accent-blue)"></span>
-          <span class="t-label">Lineage 99.99% &middot; Invariant 100%</span>
-        </div>
+
       </div>
     </div>
   </header>
