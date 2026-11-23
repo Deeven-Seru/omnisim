@@ -238,12 +238,15 @@ def main(argv: list[str] | None = None) -> None:
         argv = sys.argv[1:]
 
     # Default to 'simulate' if flags or no subcommands are passed directly
-    subcommands = {"simulate", "serve", "benchmark", "terraform", "vc-gauntlet", "dataset-benchmark", "canonical-benchmarks", "patch"}
+    subcommands = {"simulate", "serve", "benchmark", "terraform", "vc-gauntlet", "dataset-benchmark", "canonical-benchmarks", "patch", "mcp-toolbox"}
     if not argv or (argv[0] not in subcommands and argv[0] not in {"-h", "--help", "-v", "--version"}):
         argv = ["simulate"] + argv
 
     parser = argparse.ArgumentParser(description="OmniSim: Universal Counterfactual Simulation Engine")
     subparsers = parser.add_subparsers(dest="command", help="Sub-commands")
+
+    # mcp-toolbox command
+    mcp_parser = subparsers.add_parser("mcp-toolbox", help="Run blind historical validation against googleapis/mcp-toolbox bug and fix")
 
     # simulate command
     sim_parser = subparsers.add_parser("simulate", help="Run counterfactual timeline simulation")
@@ -283,7 +286,14 @@ def main(argv: list[str] | None = None) -> None:
 
     args = parser.parse_args(argv)
 
-    if args.command == "patch":
+    if args.command == "mcp-toolbox":
+        from benchmarks.mcp_toolbox_historical_validation import GoogleMCPToolboxHistoricalValidator
+        report = GoogleMCPToolboxHistoricalValidator.run_validation()
+        if not report.vulnerability_detected or not report.remediation_is_exact_match_to_future_fix:
+            sys.exit(1)
+        from benchmarks.mcp_toolbox_historical_validation import main as run_mcp_validation
+        run_mcp_validation()
+    elif args.command == "patch":
         hcl_content = ""
         target_path = args.file or getattr(args, "file_flag", "")
         if target_path:

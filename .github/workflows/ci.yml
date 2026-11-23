@@ -39,6 +39,7 @@ jobs:
           python -m omnisim.cli vc-gauntlet
           python -m omnisim.cli dataset-benchmark
           python -m omnisim.cli canonical-benchmarks
+          python -m omnisim.cli mcp-toolbox
 
       - name: Verify GitHub Action Pre-Flight Gate
         uses: ./
