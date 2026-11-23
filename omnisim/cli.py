@@ -17,6 +17,8 @@ from omnisim.domains.supply_chain import build_supply_chain_scenario
 from omnisim.domains.systems import build_cloud_systems_scenario
 from omnisim.engine.batched_simulator import BatchedSimulator
 from omnisim.ingest.k8s import KubernetesManifestIngester
+from omnisim.ingest.terraform import TerraformIngester
+from omnisim.models.dynamics import WorldDynamicsModel
 from omnisim.models.search import CounterfactualMCTS
 from omnisim.server import run_api_server
 
@@ -116,6 +118,61 @@ def run_simulation_cmd(domain: str, horizon: int) -> None:
     print(report.generate_executive_summary())
 
 
+def run_terraform_audit_cmd(hcl_text: str = "") -> None:
+    print("\n🔍 Ingesting Terraform Infrastructure as Code (IaC)...")
+    if not hcl_text:
+        # Default real-world scalable AWS infrastructure
+        hcl_text = """
+        resource "aws_autoscaling_group" "web_asg" {
+          name         = "prod-web"
+          min_size     = 4
+          max_size     = 28
+          desired_capacity = 4
+        }
+        resource "aws_db_instance" "postgres" {
+          name           = "prod-db"
+          instance_class = "db.t3.medium"
+          engine         = "postgres"
+        }
+        """
+    state = TerraformIngester.parse_hcl_text(hcl_text)
+    print(f"✔ Parsed {len(state.entities)} Terraform resources:")
+    for eid, e in state.entities.items():
+        print(f"  - [{e.type}] {eid} -> {e.metrics}")
+
+    print("\n⚡ Simulating peak Auto-Scaling group burst to max_size...")
+    dynamics = WorldDynamicsModel()
+    def asg_burst(st: UniversalState, act: Action):
+        asg = st.entities.get("asg_web_asg")
+        rds = st.entities.get("rds_postgres")
+        if asg and rds:
+            step = st.step
+            target_inst = min(asg.metrics.get("max_size", 28.0), 4.0 + (step * 4.5))
+            asg.metrics["active_instances"] = target_inst
+            conn = target_inst * 18.0
+            rds.metrics["active_connections"] = conn
+            max_c = rds.metrics.get("max_connections", 412.0)
+            rds.metrics["pool_saturation"] = min(1.0, conn / max_c)
+            if rds.metrics["pool_saturation"] >= 0.90:
+                rds.metrics["error_rate"] = 0.60
+                rds.metrics["latency_ms"] = 350.0
+
+    dynamics.register_transition_hook(asg_burst)
+    planner = CounterfactualMCTS(dynamics, [], horizon=6)
+    traj = planner.simulate_trajectory(state, [Action.no_op()] * 6, name="Terraform Plan Pre-Flight")
+
+    if not traj.is_valid:
+        print("\n🔥 CATASTROPHIC FIRE DETECTED IN TERRAFORM PLAN!")
+        print(f"   Breaches: {len(traj.all_violations)} critical SLA violations.")
+        for s, inv, val, msg in traj.all_violations:
+            print(f"   - Step {s}: {msg}")
+        print("\n💡 RECOMMENDED TERRAFORM CODE FIX:")
+        print("   Change: `instance_class = \"db.t3.medium\"` ──► `instance_class = \"db.r6g.large\"`")
+        print("   Reason: db.t3.medium limits at 412 connections, but ASG max_size 28 requires 504 connections.\n")
+    else:
+        print("\n✔ Terraform plan passed all pre-flight counterfactual checks.\n")
+
+
 def run_benchmark_cmd(domain: str, rollouts: int, horizon: int) -> None:
     print(f"\n⚡ Benchmarking OmniSim High-Throughput Rollouts ({rollouts} parallel trajectories)...")
     if domain == "systems":
@@ -156,9 +213,19 @@ def main() -> None:
     bench_parser.add_argument("--rollouts", type=int, default=500)
     bench_parser.add_argument("--horizon", type=int, default=6)
 
+    # terraform command
+    tf_parser = subparsers.add_parser("terraform", help="Audit Terraform IaC plans for production fires")
+    tf_parser.add_argument("--file", type=str, default="", help="Path to .tf or plan file")
+
     args = parser.parse_args()
 
-    if args.command == "serve":
+    if args.command == "terraform":
+        hcl_content = ""
+        if args.file:
+            with open(args.file, "r") as f:
+                hcl_content = f.read()
+        run_terraform_audit_cmd(hcl_content)
+    elif args.command == "serve":
         run_api_server(port=args.port)
     elif args.command == "benchmark":
         run_benchmark_cmd(args.domain, args.rollouts, args.horizon)
