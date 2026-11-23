@@ -238,12 +238,15 @@ def main(argv: list[str] | None = None) -> None:
         argv = sys.argv[1:]
 
     # Default to 'simulate' if flags or no subcommands are passed directly
-    subcommands = {"simulate", "serve", "benchmark", "terraform", "vc-gauntlet", "dataset-benchmark", "canonical-benchmarks", "patch", "mcp-toolbox", "tensorflow", "tf-audit"}
+    subcommands = {"simulate", "serve", "benchmark", "terraform", "vc-gauntlet", "dataset-benchmark", "canonical-benchmarks", "patch", "mcp-toolbox", "tensorflow", "tf-audit", "tf-zero-day"}
     if not argv or (argv[0] not in subcommands and argv[0] not in {"-h", "--help", "-v", "--version"}):
         argv = ["simulate"] + argv
 
     parser = argparse.ArgumentParser(description="OmniSim: Universal Counterfactual Simulation Engine")
     subparsers = parser.add_subparsers(dest="command", help="Sub-commands")
+
+    # tf-zero-day command
+    tf_zero_parser = subparsers.add_parser("tf-zero-day", help="Run blind discovery of unreported latent zero-day vulnerabilities in TensorFlow")
 
     # tf-audit command
     tf_audit_parser = subparsers.add_parser("tf-audit", help="Run blind architectural audit of current TensorFlow state against active user issues")
@@ -292,7 +295,13 @@ def main(argv: list[str] | None = None) -> None:
 
     args = parser.parse_args(argv)
 
-    if args.command == "tf-audit":
+    if args.command == "tf-zero-day":
+        from benchmarks.tensorflow_unreported_latent_audit import TensorFlowLatentVulnerabilityAuditor, main as run_tf_zero_day
+        report = TensorFlowLatentVulnerabilityAuditor.run_latent_audit()
+        if report.vulnerabilities_uncovered == 0:
+            sys.exit(1)
+        run_tf_zero_day()
+    elif args.command == "tf-audit":
         from benchmarks.tensorflow_current_state_audit import TensorFlowCurrentStateAuditor, main as run_tf_audit
         report = TensorFlowCurrentStateAuditor.run_current_audit()
         if report.critical_breaches_predicted == 0:
