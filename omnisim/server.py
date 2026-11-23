@@ -21,12 +21,25 @@ from omnisim.domains.systems import build_cloud_systems_scenario
 from omnisim.engine.batched_simulator import BatchedSimulator
 from omnisim.ingest.k8s import KubernetesManifestIngester
 from omnisim.models.search import CounterfactualMCTS
+from omnisim.saas.engine import OmniSimSaaSPlatform
+from omnisim.saas.portal import SAAS_PORTAL_HTML
 from omnisim.visualizer import HTML_TEMPLATE
 
 DEFAULT_PORT = 8088
 
+# Global SaaS Multi-Tenant Platform Instance
+saas_platform = OmniSimSaaSPlatform()
+
 
 class OmniSimAPIServer(http.server.SimpleHTTPRequestHandler):
+
+    def _get_authenticated_tenant(self):
+        auth_hdr = self.headers.get("Authorization", "")
+        tenant = saas_platform.authenticate_token(auth_hdr)
+        if not tenant:
+            # Fallback to default Acme Enterprise tenant for unauthenticated browser portal requests
+            tenant = saas_platform.tenants.get("org_enterprise_acme")
+        return tenant
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
@@ -35,10 +48,59 @@ class OmniSimAPIServer(http.server.SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.end_headers()
+            self.wfile.write(SAAS_PORTAL_HTML.encode("utf-8"))
+
+        elif parsed.path == "/visualizer":
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.end_headers()
             self.wfile.write(HTML_TEMPLATE.encode("utf-8"))
 
         elif parsed.path == "/health":
-            self._send_json({"status": "HEALTHY", "version": "0.1.0", "engine": "OmniSim SAC World Model"})
+            self._send_json({"status": "HEALTHY", "version": "0.1.0", "engine": "OmniSim SAC World Model", "platform": "OmniSim Cloud Multi-Tenant SaaS"})
+
+        elif parsed.path == "/api/v1/tenants/me":
+            tenant = self._get_authenticated_tenant()
+            from omnisim.saas.models import TIER_LIMITS
+            limits = TIER_LIMITS[tenant.tier]
+            self._send_json({
+                "tenant_id": tenant.id,
+                "name": tenant.name,
+                "tier": tenant.tier.value,
+                "monthly_usage": tenant.monthly_usage_count,
+                "monthly_quota": limits["monthly_simulations"],
+                "quota_remaining": limits["monthly_simulations"] - tenant.monthly_usage_count,
+                "limits": limits,
+            })
+
+        elif parsed.path == "/api/v1/billing/usage":
+            tenant = self._get_authenticated_tenant()
+            from omnisim.saas.models import TIER_LIMITS
+            limits = TIER_LIMITS[tenant.tier]
+            self._send_json({
+                "tenant_id": tenant.id,
+                "tier": tenant.tier.value,
+                "monthly_usage": tenant.monthly_usage_count,
+                "monthly_quota": limits["monthly_simulations"],
+                "quota_remaining": limits["monthly_simulations"] - tenant.monthly_usage_count,
+                "sla_guarantee": limits["sla_guarantee"],
+            })
+
+        elif parsed.path == "/api/v1/pr-audits":
+            audits = [
+                {
+                    "id": a.id,
+                    "repo": a.repo,
+                    "pr_number": a.pr_number,
+                    "commit_sha": a.commit_sha,
+                    "verdict": a.verdict,
+                    "critical_breaches": a.critical_breaches,
+                    "recommended_fix": a.recommended_fix,
+                    "audit_summary": a.audit_summary,
+                }
+                for a in saas_platform.pr_audits
+            ]
+            self._send_json({"audits": audits})
 
         elif parsed.path == "/api/v1/domains":
             domains = [
@@ -128,7 +190,60 @@ class OmniSimAPIServer(http.server.SimpleHTTPRequestHandler):
             self._send_json({"error": f"Invalid JSON payload: {str(e)}"})
             return
 
-        if parsed.path == "/api/v1/ingest/k8s":
+        if parsed.path == "/api/v1/tenants":
+            name = payload.get("name", "New Organization")
+            tier = payload.get("tier", "PRO")
+            tenant, raw_token = saas_platform.create_tenant(name=name, tier=tier)
+            self._send_json({
+                "tenant_id": tenant.id,
+                "name": tenant.name,
+                "tier": tenant.tier.value,
+                "api_key": raw_token,
+                "status": "PROVISIONED",
+            }, status=201)
+
+        elif parsed.path == "/api/v1/auth/keys":
+            tenant = self._get_authenticated_tenant()
+            from omnisim.saas.models import APIKey
+            key_name = payload.get("name", "CI Deployment Key")
+            api_key, raw_token = APIKey.generate(tenant.id, name=key_name)
+            saas_platform.api_keys[api_key.key_hash] = api_key
+            self._send_json({
+                "tenant_id": tenant.id,
+                "key_name": key_name,
+                "prefix": api_key.prefix,
+                "token": raw_token,
+                "scopes": api_key.scopes,
+            }, status=201)
+
+        elif parsed.path == "/api/v1/simulations":
+            tenant = self._get_authenticated_tenant()
+            domain = payload.get("domain", "systems")
+            horizon = int(payload.get("horizon", 6))
+            traffic_scale = float(payload.get("traffic_scale", 1.2))
+            try:
+                result = saas_platform.execute_simulation(
+                    tenant=tenant,
+                    domain=domain,
+                    horizon=horizon,
+                    traffic_scale=traffic_scale,
+                )
+                self._send_json(result)
+            except PermissionError as pe:
+                self._send_json({"error": str(pe)}, status=429)
+
+        elif parsed.path == "/api/v1/webhooks/github":
+            tenant = self._get_authenticated_tenant()
+            audit_result = saas_platform.process_github_pr_webhook(tenant, payload)
+            self._send_json(audit_result)
+
+        elif parsed.path == "/api/v1/ingest/telemetry":
+            tenant = self._get_authenticated_tenant()
+            metrics = payload.get("metrics", [])
+            telemetry_res = saas_platform.ingest_telemetry_stream(tenant, metrics)
+            self._send_json(telemetry_res)
+
+        elif parsed.path == "/api/v1/ingest/k8s":
             manifests = payload.get("manifests", [])
             state = KubernetesManifestIngester.parse_manifests(manifests)
             self._send_json({

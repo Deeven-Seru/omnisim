@@ -89,13 +89,22 @@ cd omnisim
 pip install .
 ```
 
-### Launch Interactive Web Visualizer
+### Launch OmniSim Cloud SaaS Portal & API Gateway
 
-Spins up a local simulation dashboard with dynamic slider controls, live counterfactual branching graphs, and delta analysis:
+Launches the multi-tenant SaaS control plane with live organization quotas, GitHub PR pre-flight gatekeeper feed, and REST APIs:
+
+```bash
+python3 -m omnisim.server
+# Open http://localhost:8088 in your browser
+```
+
+### Launch Interactive Timeline Visualizer
+
+Spins up the low-level timeline visualizer with dynamic slider controls, branching counterfactual trees, and metric deltas:
 
 ```bash
 python3 -m omnisim.visualizer
-# Open http://localhost:8088 in your browser
+# Open http://localhost:8088/visualizer
 ```
 
 ### Run Terminal Counterfactual Simulation
