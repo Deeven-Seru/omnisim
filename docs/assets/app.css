@@ -1,0 +1,630 @@
+/* =====================================================================
+   APP.CSS — the PRODUCT register (the dense, working application layer)
+   A second, scoped register for credible Palantir-style PRODUCT UI:
+   Foundry / Gotham / AIP-grade workspaces, built on a Blueprint.js-density
+   grid but reskinned by the editorial-systems marketing language.
+
+   The MARKETING register (tokens.css) is spacious: 18px body, 100px section
+   rhythm, 20px cards, surfaces that flip wholesale. That register cannot
+   produce a credible data platform — a real operator console is DENSE:
+   ~13px text, a 4px spacing grid, 28px table rows, a DATA GRID as the hero
+   object, and a sanctioned elevation shadow for floating chrome.
+
+   This file is the bridge. It is SCOPED ENTIRELY to a `.app` container, so it
+   never leaks into the marketing tokens. It REUSES the marketing vocabulary —
+   the tracked-out mono earmark, the underline-as-emphasis, the hairline
+   line-work — so the product still reads as the same family, just compressed.
+
+   Load order (canonical — matches references/product-ui.md §0):
+     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+     <link rel="stylesheet" href="../fonts.css">    (self-hosted Alliance / Apercu Mono)
+     <link rel="stylesheet" href="../tokens.css">   (the marketing system — fonts, base, marketing utilities)
+     <link rel="stylesheet" href="../css/app.css">  (THIS file — the product register, scoped to .app)
+
+   tokens.css must load first: this layer inherits its --font-* stacks and the
+   per-glyph 中文 fallback, and only overrides what density demands.
+   ===================================================================== */
+
+/* =====================================================================
+   APP TOKENS — defined on .app so they never touch the marketing :root.
+   A dark workspace canvas, a 4px grid, muted FUNCTIONAL status color.
+   ===================================================================== */
+.app {
+  /* ---------- WORKSPACE SURFACES (cool near-black, half-step warmer than
+     the marketing #0D0E10 so panels read as planes, not voids) ---------- */
+  --app-bg:        #14171A;   /* the canvas behind every panel */
+  --app-panel:     #1B1F23;   /* rail / inspector / card panel fill */
+  --app-elevated:  #23282E;   /* FLOATING chrome only — menus, command palette */
+  --app-line:      #2B3137;   /* hairline — borders, row separators, dividers */
+  --app-line-soft: #21262B;   /* fainter hairline — interior cell separators */
+
+  /* ---------- TEXT (off-white family, never pure white) ---------- */
+  --app-text:      #D6DADF;   /* primary text — the off-white of the dense register */
+  --app-text-dim:  #8A929B;   /* secondary text, column headers, meta */
+  --app-text-mute: #828A93;   /* tertiary — meta/placeholders; lightened to clear WCAG AA on the panel surfaces */
+  --app-hi:        #EFEFEF;   /* the marketing off-white — used for the ONE emphasis */
+
+  /* ---------- FUNCTIONAL STATUS — inside the brand vocabulary, NO green.
+     Status is the ONLY color in the product and it is FUNCTIONAL (it means
+     something), never decorative. It stays in the cool brand accents (steel /
+     slate-periwinkle) + the brand wine for error, with ONE heavily-muted warm
+     tone reserved for warning. Differentiate primarily by dot FILL + LABEL,
+     hue second — so the workspace reads monochrome, not traffic-lit. ---------- */
+  --app-success: #6F89A3;   /* steel (brand accent-blue) — healthy / synced / live */
+  --app-info:    #787DA1;   /* slate-periwinkle (brand accent-indigo) — running / informational */
+  --app-warning: #8C7F5C;   /* muted khaki-ochre — degraded / attention (the one warm functional tone, low-chroma; NOT green) */
+  --app-error:   #6B314D;   /* brand wine red — failed / breached */
+  --app-neutral: #6B747D;   /* unknown / archived / off */
+
+  /* ---------- DENSITY — the whole point. A 4px base grid. ---------- */
+  --app-space:   4px;    /* the base unit; everything is a multiple */
+  --app-space-2: 8px;
+  --app-space-3: 12px;
+  --app-space-4: 16px;
+  --app-space-6: 24px;
+  --app-row-h:   28px;   /* the canonical dense table-row height */
+  --app-radius:  4px;    /* dense corners — a quarter of the 20px marketing card */
+  --app-radius-lg: 6px;  /* panels / the command palette */
+
+  /* ---------- TYPE — small. ~13px body, ~11px meta. ---------- */
+  --app-fs:       13px;  /* body / cell text */
+  --app-fs-sm:    12px;  /* secondary text */
+  --app-fs-meta:  11px;  /* mono labels, badges, column headers */
+  --app-fs-title: 15px;  /* panel titles */
+  --app-lh:       1.45;
+
+  /* ---------- ELEVATION — the ONE place flatness yields. A single soft
+     shadow for FLOATING chrome (command palette, menus, popovers). Flat
+     everywhere else; this is the sanctioned exception for overlays. ---------- */
+  --app-elev: 0 8px 28px -10px rgba(0, 0, 0, 0.6),
+              0 2px 8px -4px rgba(0, 0, 0, 0.5);
+
+  /* ---------- SHELL METRICS ---------- */
+  --app-rail-w:      232px;  /* left navigation rail */
+  --app-inspector-w: 320px;  /* right inspector panel */
+  --app-topbar-h:    44px;
+
+  background: var(--app-bg);
+  color: var(--app-text);
+  font-family: var(--font-body);   /* inherited from tokens.css */
+  font-size: var(--app-fs);
+  line-height: var(--app-lh);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* The keyboard focus ring flips to the off-white high-tone inside the dark app
+   (mirrors the .on-dark rule in tokens.css, but scoped). */
+.app { --focus-ring: var(--app-hi); }
+
+/* Mono is the numeric / label voice — reuse the marketing --font-mono stack so
+   per-glyph 中文 fallback still works. */
+.app .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* =====================================================================
+   SHELL — the three-pane operator console (left rail / main / inspector).
+   A CSS grid: a fixed-width nav rail, a fluid main area, a fixed inspector.
+   The topbar spans all three across the top.
+   ===================================================================== */
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--app-rail-w) 1fr var(--app-inspector-w);
+  grid-template-rows: var(--app-topbar-h) 1fr;
+  grid-template-areas:
+    "topbar topbar  topbar"
+    "rail   main    inspector";
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+}
+.app-shell > .app-topbar    { grid-area: topbar; }
+.app-shell > .app-rail      { grid-area: rail; }
+.app-shell > .app-main      { grid-area: main; min-width: 0; min-height: 0; overflow: auto; }
+.app-shell > .app-inspector { grid-area: inspector; }
+
+/* Collapse the inspector first, then the rail, on narrow viewports. */
+@media (max-width: 1180px) {
+  .app-shell { grid-template-columns: var(--app-rail-w) 1fr; grid-template-areas: "topbar topbar" "rail main"; }
+  .app-shell > .app-inspector { display: none; }
+}
+@media (max-width: 820px) {
+  .app-shell { grid-template-columns: 1fr; grid-template-areas: "topbar" "main"; }
+  .app-shell > .app-rail { display: none; }
+}
+
+/* =====================================================================
+   TOPBAR — the app chrome strip. Brand mark + workspace switcher on the
+   left, a ⌘K command affordance in the center, status/actions on the right.
+   ===================================================================== */
+.app-topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-4);
+  padding-inline: var(--app-space-3);
+  background: var(--app-panel);
+  border-bottom: 1px solid var(--app-line);
+}
+.app-topbar .app-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--app-space-2);
+  font-family: var(--font-display);
+  font-size: var(--app-fs-title);
+  letter-spacing: -0.01em;
+  color: var(--app-hi);
+}
+.app-topbar .app-brand .ring { width: 14px; border-color: currentColor; }
+.app-topbar .app-brand .cn { font-size: var(--app-fs-sm); color: var(--app-text-dim); letter-spacing: 0.08em; }
+
+/* ⌘K affordance — a faux search input that opens the command palette.
+   It is a BUTTON, not a real field: pressing it (or ⌘K) raises .cmdk. */
+.app-cmd-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--app-space-2);
+  min-width: 280px;
+  max-width: 420px;
+  padding: 5px var(--app-space-2) 5px var(--app-space-3);
+  font-family: var(--font-body);
+  font-size: var(--app-fs-sm);
+  color: var(--app-text-dim);
+  background: var(--app-bg);
+  border: 1px solid var(--app-line);
+  border-radius: var(--app-radius);
+  cursor: pointer;
+  text-align: left;
+}
+.app-cmd-trigger:hover { border-color: var(--app-text-mute); }
+.app-cmd-trigger .kbd { margin-left: auto; }
+
+/* A keycap — used for ⌘K and palette shortcut hints. */
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-meta);
+  line-height: 1;
+  padding: 3px 6px;
+  color: var(--app-text-dim);
+  background: var(--app-panel);
+  border: 1px solid var(--app-line);
+  border-radius: 3px;
+}
+
+.app-topbar .app-actions { margin-left: auto; display: inline-flex; align-items: center; gap: var(--app-space-3); }
+
+/* =====================================================================
+   RAIL — left navigation. A tree of workspaces / object types. Earmarked
+   section headers reuse the marketing mono-label vocabulary, compressed.
+   ===================================================================== */
+.app-rail {
+  background: var(--app-panel);
+  border-right: 1px solid var(--app-line);
+  overflow-y: auto;
+  padding: var(--app-space-3) 0;
+}
+.app-rail .rail-head {
+  display: block;
+  padding: var(--app-space-2) var(--app-space-3) var(--app-space);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-meta);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--app-text-mute);
+}
+.app-rail .rail-head.is-cjk { letter-spacing: 0.2em; text-transform: none; }
+.app-rail .rail-head + .rail-head { margin-top: var(--app-space-3); }
+
+/* A nav row. .is-active draws the signature 2px ledger bar on the left. */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-2);
+  padding: 6px var(--app-space-3);
+  font-size: var(--app-fs);
+  color: var(--app-text-dim);
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  text-decoration: none;
+}
+.nav-item:hover { background: var(--app-bg); color: var(--app-text); }
+.nav-item.is-active { color: var(--app-hi); background: var(--app-bg); border-left-color: var(--app-hi); }
+.nav-item .nav-count { margin-left: auto; font-family: var(--font-mono); font-size: var(--app-fs-meta); color: var(--app-text-mute); font-variant-numeric: tabular-nums; }
+.nav-item .nav-glyph { width: 14px; text-align: center; color: var(--app-text-mute); font-family: var(--font-mono); }
+.nav-item.is-active .nav-glyph { color: var(--app-info); }
+
+/* =====================================================================
+   MAIN — the working area. A header strip (title + toolbar + tabs), then
+   the hero object: the data grid. The header is sticky so the grid scrolls
+   under it.
+   ===================================================================== */
+.app-main { background: var(--app-bg); display: flex; flex-direction: column; }
+.app-head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: var(--app-space-3) var(--app-space-4) 0;
+  background: var(--app-bg);
+  border-bottom: 1px solid var(--app-line);
+}
+.app-head .head-row { display: flex; align-items: flex-end; gap: var(--app-space-4); }
+.app-head .head-title { display: flex; flex-direction: column; gap: 2px; }
+.app-head .head-title .eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-meta);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--app-text-mute);
+}
+.app-head .head-title .eyebrow.is-cjk { letter-spacing: 0.18em; text-transform: none; }
+.app-head .head-title h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--app-hi);
+}
+
+/* =====================================================================
+   TABS — flat, hairline-underlined; the active tab carries the off-white
+   2px rule. No pills here — the product register is rectilinear by nature.
+   ===================================================================== */
+.tabs { display: flex; gap: var(--app-space-4); margin-top: var(--app-space-3); }
+.tab {
+  padding: var(--app-space-2) 1px var(--app-space-3);
+  font-size: var(--app-fs);
+  color: var(--app-text-dim);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  background: none;
+  font-family: inherit;
+  margin-bottom: -1px;
+}
+.tab:hover { color: var(--app-text); }
+.tab.is-active { color: var(--app-hi); border-bottom-color: var(--app-hi); }
+.tab .tab-count { margin-left: 6px; font-family: var(--font-mono); font-size: var(--app-fs-meta); color: var(--app-text-mute); }
+
+/* =====================================================================
+   TOOLBAR — a dense action strip above the grid. Square buttons, hairline
+   borders, mono affordances. (Product controls are SQUARE — radius 4px —
+   not the marketing pill.)
+   ===================================================================== */
+.toolbar { display: flex; align-items: center; gap: var(--app-space-2); flex-wrap: wrap; }
+.toolbar .spacer { margin-left: auto; }
+
+.app-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 var(--app-space-2);
+  font-family: var(--font-body);
+  font-size: var(--app-fs-sm);
+  color: var(--app-text);
+  background: var(--app-panel);
+  border: 1px solid var(--app-line);
+  border-radius: var(--app-radius);
+  cursor: pointer;
+}
+.app-btn:hover { border-color: var(--app-text-mute); background: var(--app-elevated); }
+.app-btn.is-primary { background: var(--app-hi); color: #14171A; border-color: var(--app-hi); }
+.app-btn.is-primary:hover { opacity: 0.88; background: var(--app-hi); }
+.app-btn.is-quiet { background: transparent; border-color: transparent; color: var(--app-text-dim); }
+.app-btn.is-quiet:hover { color: var(--app-text); background: var(--app-panel); }
+.app-btn .mono { font-size: var(--app-fs-meta); color: var(--app-text-dim); }
+
+/* A dense inline filter/search field inside the toolbar. */
+.app-field {
+  height: 26px;
+  min-width: 200px;
+  padding: 0 var(--app-space-2);
+  font-family: var(--font-body);
+  font-size: var(--app-fs-sm);
+  color: var(--app-text);
+  background: var(--app-bg);
+  border: 1px solid var(--app-line);
+  border-radius: var(--app-radius);
+}
+.app-field::placeholder { color: var(--app-text-mute); }
+.app-field:focus { border-color: var(--app-text-dim); }   /* ring via .app :focus-visible below */
+
+/* Keyboard focus for the PRODUCT register — a visible ring on every control.
+   The marketing :focus-visible (tokens.css) does not reach .app-scoped elements,
+   so the dense register needs its own (WCAG 2.4.7). */
+.app :where(a, .app-btn, .app-field, .app-cmd-trigger, .nav-item, .tab,
+  .dtable thead th.sortable, .cmdk-input, .cmdk-item, [tabindex]):focus-visible {
+  outline: 2px solid var(--app-info);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* =====================================================================
+   DTABLE — THE DATA GRID. This is the hero object of the product register;
+   the whole screen exists to serve it. Dense rows (~28px), a sticky sortable
+   header with a mono sort caret, hairline row separators, right-aligned MONO
+   numeric columns, and a quiet hover row. Strictly monochrome + muted status.
+   ===================================================================== */
+.dtable-wrap { padding: var(--app-space-3) var(--app-space-4) var(--app-space-6); }
+.dtable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--app-fs);
+  border: 1px solid var(--app-line);
+  border-radius: var(--app-radius);
+  /* radius needs clipping to show on a table; the header bg respects it */
+  overflow: hidden;
+}
+
+/* Sticky, sortable header. Mono, tracked, dim — the column names are labels. */
+.dtable thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: var(--app-row-h);
+  padding: 0 var(--app-space-3);
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-meta);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--app-text-dim);
+  background: var(--app-panel);
+  border-bottom: 1px solid var(--app-line);
+  white-space: nowrap;
+  user-select: none;
+}
+.dtable thead th.sortable { cursor: pointer; }
+.dtable thead th.sortable:hover { color: var(--app-text); }
+/* The mono sort caret — a ▲/▼ rendered as a unicode glyph in currentColor. */
+.dtable thead th .caret { margin-left: 5px; font-size: 9px; color: var(--app-text-mute); }
+.dtable thead th[aria-sort="ascending"]  .caret::after { content: "▲"; color: var(--app-text); }
+.dtable thead th[aria-sort="descending"] .caret::after { content: "▼"; color: var(--app-text); }
+.dtable thead th[aria-sort="none"]       .caret::after { content: "↕"; }
+
+/* Numeric / ID columns: right-aligned, mono, tabular figures. */
+.dtable .num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.dtable .id  { font-family: var(--font-mono); color: var(--app-text-dim); letter-spacing: 0.02em; }
+
+/* Body rows — dense, hairline separated, quiet hover. */
+.dtable tbody td {
+  height: var(--app-row-h);
+  padding: 0 var(--app-space-3);
+  border-bottom: 1px solid var(--app-line-soft);
+  color: var(--app-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 0;   /* let ellipsis work inside fixed grid columns */
+}
+.dtable tbody tr:last-child td { border-bottom: 0; }
+.dtable tbody tr:hover td { background: var(--app-panel); }
+.dtable tbody tr.is-selected td { background: var(--app-elevated); }
+.dtable tbody tr.is-selected td:first-child { box-shadow: inset 2px 0 0 var(--app-hi); }
+.dtable td .primary { color: var(--app-text); }
+.dtable td .secondary { color: var(--app-text-dim); }
+
+/* A compact row footer: count + pagination, mono. */
+.dtable-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-3);
+  margin-top: var(--app-space-2);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-meta);
+  color: var(--app-text-mute);
+}
+.dtable-foot .spacer { margin-left: auto; }
+
+/* =====================================================================
+   STATUS — functional color, muted, used ONLY to mean something. A dot for
+   inline use in cells, a badge for standalone state. Never decorative.
+   ===================================================================== */
+.status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;       /* the dot stays round — it's a marker, like the marketing ring */
+  margin-right: 7px;
+  vertical-align: baseline;
+  background: var(--app-neutral);
+}
+.status-dot.is-success { background: var(--app-success); }
+.status-dot.is-warning { background: var(--app-warning); }
+.status-dot.is-error   { background: var(--app-error); }
+.status-dot.is-info    { background: var(--app-info); }
+.status-dot.is-neutral { background: var(--app-neutral); }
+
+/* Badge — a hairline-outlined state chip. Square (product register). The text
+   inherits the muted status color via currentColor; the border is a soft mix. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 18px;
+  padding: 0 7px;
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-meta);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  border-radius: var(--app-radius);
+  color: var(--app-text-dim);
+  background: transparent;
+}
+.badge.is-success { color: var(--app-success); }
+.badge.is-warning { color: var(--app-warning); }
+.badge.is-error   { color: var(--app-error); }
+.badge.is-info    { color: var(--app-info); }
+.badge.is-neutral { color: var(--app-neutral); }
+
+/* =====================================================================
+   INSPECTOR — the right detail panel. Reveals the selected object's fields,
+   a small hairline chart, and recent activity. A panel, not a card.
+   ===================================================================== */
+.app-inspector {
+  background: var(--app-panel);
+  border-left: 1px solid var(--app-line);
+  overflow-y: auto;
+  padding: var(--app-space-4);
+}
+.app-inspector .insp-head { display: flex; flex-direction: column; gap: 3px; margin-bottom: var(--app-space-4); }
+.app-inspector .insp-head .eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-meta);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--app-text-mute);
+}
+.app-inspector .insp-head .eyebrow.is-cjk { letter-spacing: 0.18em; text-transform: none; }
+.app-inspector .insp-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  color: var(--app-hi);
+}
+
+/* A field row — label left (mono dim), value right (off-white). The
+   underline-as-emphasis move from the marketing register, applied to the one
+   value worth emphasizing. */
+.field { display: flex; align-items: baseline; gap: var(--app-space-3); padding: 6px 0; border-bottom: 1px solid var(--app-line-soft); }
+.field:last-of-type { border-bottom: 0; }
+.field .f-key {
+  flex: 0 0 38%;
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-meta);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--app-text-dim);
+}
+.field .f-key.is-cjk { letter-spacing: 0.12em; text-transform: none; }
+.field .f-val { flex: 1; color: var(--app-text); }
+.field .f-val.mono { font-variant-numeric: tabular-nums; }
+.field .f-val .u-emph { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.18em; text-decoration-skip-ink: none; }
+
+/* Inspector section divider with a mono earmark — reuses the section vocabulary. */
+.insp-section { margin-top: var(--app-space-6); }
+.insp-section > .insp-label {
+  display: block;
+  margin-bottom: var(--app-space-2);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-meta);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--app-text-mute);
+}
+.insp-section > .insp-label.is-cjk { letter-spacing: 0.18em; text-transform: none; }
+
+/* The small hairline chart slot — strokes in currentColor, no fills/grids.
+   This is the SAME instrument discipline as references/data-viz.md, just sized
+   for the inspector. Set color on .insp-chart and stroke currentColor in SVG. */
+.insp-chart { color: var(--app-text); }
+.insp-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.insp-chart .chart-cap { margin-top: 6px; font-family: var(--font-mono); font-size: var(--app-fs-meta); letter-spacing: 0.04em; color: var(--app-text-mute); }
+
+/* Activity feed — a hairline-tracked event log, mono timestamps. */
+.feed { list-style: none; margin: 0; padding: 0; }
+.feed li { display: flex; gap: var(--app-space-3); padding: var(--app-space-2) 0; border-bottom: 1px solid var(--app-line-soft); }
+.feed li:last-child { border-bottom: 0; }
+.feed .feed-time { flex: 0 0 56px; font-family: var(--font-mono); font-size: var(--app-fs-meta); color: var(--app-text-mute); font-variant-numeric: tabular-nums; }
+.feed .feed-body { flex: 1; font-size: var(--app-fs-sm); color: var(--app-text-dim); }
+.feed .feed-body b { font-weight: 400; color: var(--app-text); }
+
+/* =====================================================================
+   TREE — a disclosure tree for the rail or a nested object browser.
+   Hairline guides, mono carets. Indentation via --depth custom property.
+   ===================================================================== */
+.tree { list-style: none; margin: 0; padding: 0; }
+.tree .tree-node {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-2);
+  padding: 5px var(--app-space-3);
+  padding-left: calc(var(--app-space-3) + var(--depth, 0) * var(--app-space-4));
+  font-size: var(--app-fs);
+  color: var(--app-text-dim);
+  cursor: pointer;
+}
+.tree .tree-node:hover { background: var(--app-bg); color: var(--app-text); }
+.tree .tree-node .twisty { width: 10px; font-family: var(--font-mono); font-size: 9px; color: var(--app-text-mute); }
+.tree .tree-node[aria-expanded="true"]  .twisty::after { content: "▾"; }
+.tree .tree-node[aria-expanded="false"] .twisty::after { content: "▸"; }
+.tree .tree-node .tree-count { margin-left: auto; font-family: var(--font-mono); font-size: var(--app-fs-meta); color: var(--app-text-mute); }
+
+/* =====================================================================
+   CMDK — the command palette. THE ONE ELEVATION EXCEPTION in the product:
+   a floating overlay that lifts off the canvas with a single soft shadow.
+   Everything else is flat; floating chrome (this, menus, popovers) is the
+   one place flatness yields. Toggled with ⌘K — `hidden` by default.
+   ===================================================================== */
+.cmdk-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 14vh;
+  background: rgba(8, 10, 12, 0.55);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+.cmdk-scrim[hidden] { display: none; }
+.cmdk {
+  width: min(560px, 92vw);
+  background: var(--app-elevated);
+  border: 1px solid var(--app-line);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-elev);   /* the sanctioned elevation */
+  overflow: hidden;
+}
+.cmdk .cmdk-input-row { display: flex; align-items: center; gap: var(--app-space-2); padding: var(--app-space-3); border-bottom: 1px solid var(--app-line); }
+.cmdk .cmdk-input-row .mono { color: var(--app-text-mute); font-size: var(--app-fs-meta); }
+.cmdk .cmdk-input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--app-text);
+  font-family: var(--font-body);
+  font-size: var(--app-fs-title);
+}
+.cmdk .cmdk-input:focus-visible { outline: 2px solid var(--app-info); outline-offset: -3px; }
+.cmdk .cmdk-input::placeholder { color: var(--app-text-mute); }
+.cmdk .cmdk-group { padding: var(--app-space-2) 0; }
+.cmdk .cmdk-group-label {
+  padding: var(--app-space) var(--app-space-3);
+  font-family: var(--font-mono);
+  font-size: var(--app-fs-meta);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--app-text-mute);
+}
+.cmdk .cmdk-item {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-2);
+  padding: 7px var(--app-space-3);
+  font-size: var(--app-fs);
+  color: var(--app-text-dim);
+  cursor: pointer;
+}
+.cmdk .cmdk-item:hover, .cmdk .cmdk-item.is-active { background: var(--app-panel); color: var(--app-text); }
+.cmdk .cmdk-item .glyph { width: 16px; text-align: center; font-family: var(--font-mono); color: var(--app-text-mute); }
+.cmdk .cmdk-item .hint { margin-left: auto; }
+
+/* =====================================================================
+   MOTION — restraint, same as the marketing register. Micro-transitions
+   only; everything yields to reduced-motion.
+   ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .app *, .app *::before, .app *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
