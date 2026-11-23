@@ -31,6 +31,7 @@
     .stagger-2 { transition-delay: 0.16s; }
     .stagger-3 { transition-delay: 0.24s; }
     .stagger-4 { transition-delay: 0.32s; }
+    .stagger-5 { transition-delay: 0.40s; }
 
     /* Canvas background layer */
     #ontology-canvas {
@@ -41,7 +42,7 @@
       height: 100vh;
       pointer-events: none;
       z-index: 0;
-      opacity: 0.38;
+      opacity: 0.35;
     }
 
     /* Ambient radar scanline across hero */
@@ -147,13 +148,43 @@
       transform: translateX(4px);
     }
 
+    /* Interactive Tab Switcher */
+    .mode-tabs {
+      display: inline-flex;
+      background: color-mix(in srgb, var(--surface-dark) 80%, transparent);
+      border: var(--hairline) solid color-mix(in srgb, var(--off-white) 16%, transparent);
+      border-radius: var(--r-pill);
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: var(--space-s);
+    }
+    .mode-tab {
+      font-family: var(--font-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      padding: 8px 16px;
+      border-radius: var(--r-pill);
+      border: none;
+      background: transparent;
+      color: color-mix(in srgb, var(--off-white) 60%, transparent);
+      cursor: pointer;
+      transition: all 180ms ease;
+    }
+    .mode-tab:hover {
+      color: var(--off-white);
+    }
+    .mode-tab.is-active {
+      background: var(--off-white);
+      color: var(--ink);
+    }
+
     /* Interactive Simulation Console */
     .sim-console {
       border: var(--hairline) solid color-mix(in srgb, var(--off-white) 16%, transparent);
       border-radius: var(--r-card);
       background: var(--surface-dark);
       padding: 36px;
-      margin-top: var(--space-m);
       position: relative;
       overflow: hidden;
       box-shadow: 0 24px 64px rgba(0,0,0,0.45);
@@ -312,6 +343,81 @@
       margin-top: 2px;
     }
 
+    /* Dense Enterprise Operations Table */
+    .ops-table-container {
+      border: var(--hairline) solid color-mix(in srgb, var(--ink) 16%, transparent);
+      border-radius: var(--r-control);
+      overflow-x: auto;
+      background: var(--white);
+    }
+    .ops-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: var(--fs-body-sm);
+    }
+    .ops-table th {
+      font-family: var(--font-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      color: var(--text-medium);
+      background: var(--paper-muted);
+      padding: 14px 18px;
+      border-bottom: var(--hairline) solid color-mix(in srgb, var(--ink) 14%, transparent);
+      font-weight: 500;
+    }
+    .ops-table td {
+      padding: 16px 18px;
+      border-bottom: var(--hairline) solid color-mix(in srgb, var(--ink) 8%, transparent);
+      color: var(--ink);
+    }
+    .ops-table tr {
+      cursor: pointer;
+      transition: background 120ms ease;
+    }
+    .ops-table tr:hover {
+      background: var(--paper);
+    }
+    .ops-table tr.is-selected {
+      background: color-mix(in srgb, var(--accent-indigo) 8%, var(--white));
+    }
+    .ops-table .id-tag {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: var(--ls-label);
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    /* Invariant Rule Cards */
+    .invariant-card {
+      background: var(--surface-dark);
+      border: var(--hairline) solid color-mix(in srgb, var(--off-white) 14%, transparent);
+      border-radius: var(--r-card);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+      transition: transform 220ms ease, border-color 220ms ease;
+    }
+    .invariant-card:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--off-white) 35%, transparent);
+    }
+    .inv-bound {
+      font-family: var(--font-mono);
+      font-size: var(--fs-label);
+      letter-spacing: var(--ls-label);
+      text-transform: uppercase;
+      padding: 6px 10px;
+      border-radius: var(--r-pill);
+      border: var(--hairline) solid currentColor;
+      display: inline-block;
+      align-self: flex-start;
+    }
+
     .benchmark-card {
       background: var(--white);
       border-radius: var(--r-card);
@@ -362,11 +468,13 @@
       <span class="cn" style="font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--ls-label); text-transform: uppercase; opacity: 0.6;">WORLD MODEL</span>
     </div>
     <div class="links">
-      <a href="#platforms">Platforms</a>
+      <a href="#platforms">Platform</a>
       <a href="#simulator">Simulation</a>
+      <a href="#ontology-table">Ontology Table</a>
+      <a href="#invariants">Invariants</a>
       <a href="#outcomes">Outcomes</a>
       <a href="#benchmarks">Benchmarks</a>
-      <a href="https://pypi.org/project/omnisim-engine/" target="_blank">Engine Distribution</a>
+      <a href="https://pypi.org/project/omnisim-engine/" target="_blank">PyPI</a>
       <a href="https://github.com/Deeven-Seru/omnisim" target="_blank" class="btn btn-secondary" style="padding:10px 18px">Deploy Engine <span class="arrow"></span></a>
     </div>
   </nav>
@@ -425,7 +533,7 @@
     </div>
   </header>
 
-  <!-- PLATFORMS / CAPABILITIES (INVERTED HIGH CONTRAST TO WHITE) -->
+  <!-- PLATFORMS / 4-STAGE PIPELINE MARKETECTURE (INVERTED TO WHITE) -->
   <section class="on-white section" id="platforms">
     <div class="container">
       <div class="grid-12" style="margin-bottom:var(--space-m)">
@@ -438,6 +546,42 @@
         </div>
       </div>
 
+      <!-- Palantir signature 4-state Marketecture Phase Boxes -->
+      <div class="grid-12" style="row-gap:var(--gutter); margin-bottom:var(--space-m)">
+        <div style="grid-column: span 3" class="reveal stagger-1">
+          <div class="phase phase-solid">
+            <span class="lbl">Stage 01 &middot; Solid</span>
+            <h4 class="t-title" style="margin-bottom:8px">Declarative Ingestion</h4>
+            <p class="t-body-sm" style="color:var(--text-medium)">Parses Terraform, K8s manifests, and AWS/GCP topology into an interconnected directed acyclic graph.</p>
+          </div>
+        </div>
+
+        <div style="grid-column: span 3" class="reveal stagger-2">
+          <div class="phase phase-dashed">
+            <span class="lbl">Stage 02 &middot; Dashed</span>
+            <h4 class="t-title" style="margin-bottom:8px">Causal Compilation</h4>
+            <p class="t-body-sm" style="color:var(--text-medium)">Applies hardware laws, connection pool ratios, and concurrency limits to graph nodes automatically.</p>
+          </div>
+        </div>
+
+        <div style="grid-column: span 3" class="reveal stagger-3">
+          <div class="phase phase-striped">
+            <span class="lbl">Stage 03 &middot; Striped</span>
+            <h4 class="t-title" style="margin-bottom:8px">Forward Search</h4>
+            <p class="t-body-sm" style="color:var(--text-medium)">Action-conditioned Monte Carlo rollout search ($S_{t+1}$) stress tests traffic surges across candidate futures.</p>
+          </div>
+        </div>
+
+        <div style="grid-column: span 3" class="reveal stagger-4">
+          <div class="phase phase-filled">
+            <span class="lbl">Stage 04 &middot; Filled</span>
+            <h4 class="t-title" style="margin-bottom:8px">Titan Enforcement</h4>
+            <p class="t-body-sm" style="color:var(--text-medium)">Blocks unsafe PRs in CI and automatically synthesizes mathematically verified remediation upgrades.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 Platform Capabilities -->
       <div class="steps">
         <div class="step reveal stagger-1">
           <span class="pill pill-num" style="border-color:var(--ink)">01</span>
@@ -493,7 +637,14 @@
         </p>
       </div>
 
-      <div class="sim-console reveal stagger-1">
+      <!-- Mode selection tabs -->
+      <div class="mode-tabs reveal stagger-1" style="margin-top:var(--space-s)">
+        <button class="mode-tab is-active" id="tab-waveform" onclick="switchSimTab('waveform')">Waveform Telemetry</button>
+        <button class="mode-tab" id="tab-graph" onclick="switchSimTab('graph')">Topology Causal Graph</button>
+        <button class="mode-tab" id="tab-diff" onclick="switchSimTab('diff')">Titan Remediation Diff</button>
+      </div>
+
+      <div class="sim-console reveal stagger-2">
         <!-- Sliders -->
         <div class="sim-slider-row">
           <div class="slider-card">
@@ -518,8 +669,8 @@
           </div>
         </div>
 
-        <!-- Waveform Oscilloscope -->
-        <div class="oscilloscope-box">
+        <!-- Waveform Oscilloscope Container -->
+        <div class="oscilloscope-box" id="waveform-box">
           <div class="waveform-meta">
             <div style="display:flex; align-items:center; gap:8px">
               <span class="pulse-dot"></span>
@@ -528,6 +679,60 @@
             <span id="telemetry-status" style="color:var(--off-white)">Sampling 60 Hz</span>
           </div>
           <canvas id="waveform-canvas"></canvas>
+        </div>
+
+        <!-- Alternative Tab: Topology Graph Display -->
+        <div id="graph-box" style="display:none; padding:24px; border:var(--hairline) solid color-mix(in srgb, var(--off-white) 14%, transparent); border-radius:var(--r-control); background:#060709; margin-bottom:var(--space-m);">
+          <div class="t-label" style="color:var(--off-white); margin-bottom:14px">Topology Hierarchy &middot; Relational Dependency Chain</div>
+          <div style="display:flex; flex-direction:column; gap:12px; font-family:var(--font-mono); font-size:12px;">
+            <div style="padding:14px; background:var(--surface-dark); border:1px solid color-mix(in srgb, var(--off-white) 16%, transparent); border-radius:6px; display:flex; justify-content:space-between;">
+              <span>[ENTITY 01] Edge Envoy Ingress Cluster</span>
+              <span style="opacity:0.65">ACTIVE: 12,000 QPS CEILING</span>
+            </div>
+            <div style="padding-left:24px; color:var(--off-white); font-size:11px;">
+              &darr; DIRECT FANOUT &middot; RATIO: 18 THREADS / REPLICA
+            </div>
+            <div style="padding:14px; background:var(--surface-dark); border:1px solid color-mix(in srgb, var(--off-white) 16%, transparent); border-radius:6px; display:flex; justify-content:space-between;">
+              <span>[ENTITY 02] Checkout Service Autoscaling Group (EKS)</span>
+              <span style="opacity:0.65">NODES: 8 CURRENT | 28 BURST CAP</span>
+            </div>
+            <div style="padding-left:24px; color:var(--off-white); font-size:11px;">
+              &darr; INVARIANT BOUND: pool_saturation &le; 0.85
+            </div>
+            <div style="padding:14px; background:color-mix(in srgb, var(--accent-blue) 12%, var(--surface-dark)); border:1px solid color-mix(in srgb, var(--accent-blue) 60%, transparent); border-radius:6px; display:flex; justify-content:space-between;">
+              <span style="color:var(--off-white)">[ENTITY 03] Relational Datastore (Aurora PostgreSQL)</span>
+              <span style="color:var(--off-white)">CAPACITY: 1,365 MAX SOCKS (r6g tier)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alternative Tab: Titan Diff Display -->
+        <div id="diff-box" style="display:none; padding:24px; border:var(--hairline) solid color-mix(in srgb, var(--off-white) 14%, transparent); border-radius:var(--r-control); background:#060709; margin-bottom:var(--space-m);">
+          <div class="t-label" style="color:var(--off-white); margin-bottom:14px">Titan Remediation Synthesis &middot; Pre-Execution Proof</div>
+          <div class="grid-12" style="row-gap:var(--space-s)">
+            <div style="grid-column: span 6">
+              <div style="padding:18px; border:1px solid color-mix(in srgb, #FF4444 35%, transparent); background:color-mix(in srgb, #FF4444 6%, var(--surface-dark)); border-radius:6px;">
+                <div class="t-label" style="color:#FF7777; margin-bottom:8px">Vulnerable Candidate State (PR #1482)</div>
+                <div style="font-family:var(--font-mono); font-size:12px; line-height:1.7;">
+                  Instance Class: db.t3.medium<br>
+                  Connection Ceiling: 412 sockets<br>
+                  Predicted Peak Saturation: 132% (544 conn)<br>
+                  Outcome: SLA Pool Collapse
+                </div>
+              </div>
+            </div>
+            <div style="grid-column: span 6">
+              <div style="padding:18px; border:1px solid color-mix(in srgb, var(--off-white) 50%, transparent); background:color-mix(in srgb, var(--surface-navy) 60%, var(--surface-dark)); border-radius:6px;">
+                <div class="t-label" style="color:var(--off-white); margin-bottom:8px">Synthesized Remediation State (Titan)</div>
+                <div style="font-family:var(--font-mono); font-size:12px; line-height:1.7;">
+                  Instance Class: db.r6g.large<br>
+                  Connection Ceiling: 1,365 sockets<br>
+                  Predicted Peak Saturation: 40% (544 conn)<br>
+                  Outcome: 100% Invariant Compliant
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Trajectory Verdict Cards -->
@@ -596,6 +801,90 @@
     </div>
   </section>
 
+  <!-- DENSE PALANTIR OPERATIONS CONSOLE TABLE (INVERTED TO WHITE) -->
+  <section class="on-white section" id="ontology-table">
+    <div class="container">
+      <div class="reveal">
+        <span class="t-label">04 ——→ Operational Entity Registry</span>
+        <h2 class="t-display-m" style="margin-top:var(--space-s)">Dynamic ontology object registry.</h2>
+        <p class="t-body" style="color:var(--text-medium); margin-top:var(--space-xs); max-width:68ch">
+          Inspect live infrastructure entities modeled in the causal graph. Each object maintains explicit physical bounds, upstream callers, downstream sinks, and invariant validation status.
+        </p>
+      </div>
+
+      <div class="ops-table-container reveal stagger-1" style="margin-top:var(--space-m)">
+        <table class="ops-table">
+          <thead>
+            <tr>
+              <th>Object ID</th>
+              <th>Infrastructure Entity</th>
+              <th>Provider &amp; Tier</th>
+              <th>Physical Ceiling</th>
+              <th>Current Headroom</th>
+              <th>Invariant Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="is-selected" onclick="selectRow(this, 'INF-ASG-01', 'Checkout API Compute Cluster', 'AWS EKS c6g.2xlarge', '28 worker nodes max', '64% headroom', 'COMPLIANT &middot; ZERO BREACH')">
+              <td class="id-tag">INF-ASG-01</td>
+              <td><strong>Checkout API Compute Cluster</strong></td>
+              <td>AWS EKS (c6g.2xlarge)</td>
+              <td>28 Nodes &middot; 504 Concurrency</td>
+              <td>64% Headroom</td>
+              <td><span class="pill" style="border-color:var(--ink)">Compliant</span></td>
+            </tr>
+            <tr onclick="selectRow(this, 'INF-RDS-01', 'Primary Transactional Datastore', 'AWS Aurora PostgreSQL (db.r6g.large)', '1,365 max connections', '54% headroom', 'INVARIANT PROTECTED')">
+              <td class="id-tag">INF-RDS-01</td>
+              <td><strong>Primary Transactional Datastore</strong></td>
+              <td>AWS Aurora (db.r6g.large)</td>
+              <td>1,365 Max Connections</td>
+              <td>54% Headroom</td>
+              <td><span class="pill" style="border-color:var(--ink)">Protected</span></td>
+            </tr>
+            <tr onclick="selectRow(this, 'INF-ING-01', 'Edge Ingress Gateway Mesh', 'Envoy Proxy v1.28', '12,000 max RPS', '52% headroom', 'ACTIVE LINEAGE')">
+              <td class="id-tag">INF-ING-01</td>
+              <td><strong>Edge Ingress Gateway Mesh</strong></td>
+              <td>Envoy Proxy v1.28</td>
+              <td>12,000 Max RPS</td>
+              <td>52% Headroom</td>
+              <td><span class="pill" style="border-color:var(--ink)">Active</span></td>
+            </tr>
+            <tr onclick="selectRow(this, 'INF-RED-01', 'Distributed Cache Cluster', 'AWS ElastiCache (cache.m6g.xlarge)', '6.8 GB RAM &middot; 65,000 IOPS', '38% headroom', 'INVARIANT VERIFIED')">
+              <td class="id-tag">INF-RED-01</td>
+              <td><strong>Distributed Cache Cluster</strong></td>
+              <td>AWS ElastiCache (cache.m6g.xlarge)</td>
+              <td>6.8 GB RAM &middot; 65k IOPS</td>
+              <td>38% Headroom</td>
+              <td><span class="pill" style="border-color:var(--ink)">Verified</span></td>
+            </tr>
+            <tr onclick="selectRow(this, 'INF-RDS-02', 'Legacy Catalog Datastore', 'AWS RDS (db.t3.medium)', '412 max connections', '98% Starvation Risk', 'TITAN REMEDIATED')">
+              <td class="id-tag">INF-RDS-02</td>
+              <td><strong>Legacy Catalog Datastore</strong></td>
+              <td>AWS RDS (db.t3.medium)</td>
+              <td>412 Max Connections</td>
+              <td>98% Saturation</td>
+              <td><span class="pill" style="border-color:var(--ink); background:var(--ink); color:var(--white)">Remediated</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Selected Entity Inspector Card -->
+      <div class="card card-dark reveal stagger-2" id="inspector-card" style="margin-top:var(--space-s); padding:24px 32px">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px">
+          <div>
+            <span class="t-label" id="inspect-id">INF-ASG-01 &middot; Lineage Inspector</span>
+            <h4 class="t-title" id="inspect-title" style="color:var(--off-white); margin-top:4px">Checkout API Compute Cluster</h4>
+          </div>
+          <div style="display:flex; gap:16px; align-items:center">
+            <span class="t-label" id="inspect-tier">AWS EKS c6g.2xlarge</span>
+            <span class="pill" id="inspect-status" style="border-color:var(--off-white); background:var(--off-white); color:var(--ink)">COMPLIANT &middot; ZERO BREACH</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- STATEMENT (HIGH CONTRAST DARK) -->
   <section class="on-dark section">
     <div class="container reveal">
@@ -605,10 +894,115 @@
     </div>
   </section>
 
-  <!-- OUTCOMES / METRICS (INVERTED HIGH CONTRAST TO WHITE) -->
+  <!-- THE INVARIANT CATALOG (THE PHYSICAL LAWS) -->
+  <section class="on-dark section" id="invariants" style="border-top:var(--hairline) solid color-mix(in srgb, var(--off-white) 12%, transparent);">
+    <div class="container">
+      <div class="reveal">
+        <span class="t-label">05 ——→ Deterministic Invariant Catalog</span>
+        <h2 class="t-display-m" style="color:var(--off-white); margin-top:var(--space-s)">The physical laws of distributed systems.</h2>
+        <p class="t-body" style="color:color-mix(in srgb, var(--off-white) 65%, transparent); margin-top:var(--space-xs); max-width:68ch">
+          OmniSim encodes operational survivability as mathematical invariants. Violations trigger automated gate halts in continuous integration pipelines.
+        </p>
+      </div>
+
+      <div class="grid-12" style="row-gap:var(--gutter); margin-top:var(--space-m)">
+        <div style="grid-column: span 4" class="reveal stagger-1">
+          <div class="invariant-card" style="height:100%">
+            <div>
+              <span class="inv-bound">INV-01 &middot; Connection Headroom</span>
+              <h3 class="t-heading" style="color:var(--off-white); margin-top:var(--space-s); font-size:22px">Datastore Pool Ceiling</h3>
+              <p class="t-body-sm" style="color:color-mix(in srgb, var(--off-white) 65%, transparent); margin-top:10px">
+                Guarantees open database sockets never exceed 85% of physical instance capability. Eliminates queue starvation under sudden bursts.
+              </p>
+            </div>
+            <div style="border-top:var(--hairline) solid color-mix(in srgb, var(--off-white) 10%, transparent); padding-top:12px;">
+              <span class="t-label">Condition: pool_saturation &le; 0.85</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="grid-column: span 4" class="reveal stagger-2">
+          <div class="invariant-card" style="height:100%">
+            <div>
+              <span class="inv-bound">INV-02 &middot; Concurrency Bound</span>
+              <h3 class="t-heading" style="color:var(--off-white); margin-top:var(--space-s); font-size:22px">Thread Fanout Starvation</h3>
+              <p class="t-body-sm" style="color:color-mix(in srgb, var(--off-white) 65%, transparent); margin-top:10px">
+                Guarantees horizontal compute scaling does not exceed backend downstream connection limits. Prevents autoscaling-induced database crashes.
+              </p>
+            </div>
+            <div style="border-top:var(--hairline) solid color-mix(in srgb, var(--off-white) 10%, transparent); padding-top:12px;">
+              <span class="t-label">Condition: worker_threads &times; nodes &lt; max_conn</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="grid-column: span 4" class="reveal stagger-3">
+          <div class="invariant-card" style="height:100%">
+            <div>
+              <span class="inv-bound">INV-03 &middot; Cascading Dampening</span>
+              <h3 class="t-heading" style="color:var(--off-white); margin-top:var(--space-s); font-size:22px">P99 Latency Bound</h3>
+              <p class="t-body-sm" style="color:color-mix(in srgb, var(--off-white) 65%, transparent); margin-top:10px">
+                Limits service tail latency under retry storms. Halts recursive microservice amplification loops before upstream gateways time out.
+              </p>
+            </div>
+            <div style="border-top:var(--hairline) solid color-mix(in srgb, var(--off-white) 10%, transparent); padding-top:12px;">
+              <span class="t-label">Condition: timeout_p99 &le; 120ms</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="grid-column: span 4" class="reveal stagger-1">
+          <div class="invariant-card" style="height:100%">
+            <div>
+              <span class="inv-bound">INV-04 &middot; Memory Headroom</span>
+              <h3 class="t-heading" style="color:var(--off-white); margin-top:var(--space-s); font-size:22px">OOM-Killer Prevention</h3>
+              <p class="t-body-sm" style="color:color-mix(in srgb, var(--off-white) 65%, transparent); margin-top:10px">
+                Prevents JVM heap and container allocations from breaching 80% physical node memory. Eliminates unpredictable container SIGKILL restarts.
+              </p>
+            </div>
+            <div style="border-top:var(--hairline) solid color-mix(in srgb, var(--off-white) 10%, transparent); padding-top:12px;">
+              <span class="t-label">Condition: heap_alloc &le; 0.80 &times; node_ram</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="grid-column: span 4" class="reveal stagger-2">
+          <div class="invariant-card" style="height:100%">
+            <div>
+              <span class="inv-bound">INV-05 &middot; Quorum Survivability</span>
+              <h3 class="t-heading" style="color:var(--off-white); margin-top:var(--space-s); font-size:22px">Cross-Zone Partition Gate</h3>
+              <p class="t-body-sm" style="color:color-mix(in srgb, var(--off-white) 65%, transparent); margin-top:10px">
+                Requires stateful clusters to maintain minimum 3-zone quorum replication, ensuring split-brain immunity during single availability-zone severed links.
+              </p>
+            </div>
+            <div style="border-top:var(--hairline) solid color-mix(in srgb, var(--off-white) 10%, transparent); padding-top:12px;">
+              <span class="t-label">Condition: active_zones &ge; 3</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="grid-column: span 4" class="reveal stagger-3">
+          <div class="invariant-card" style="height:100%">
+            <div>
+              <span class="inv-bound">INV-06 &middot; Acyclic Dependency</span>
+              <h3 class="t-heading" style="color:var(--off-white); margin-top:var(--space-s); font-size:22px">Circular Call Elimination</h3>
+              <p class="t-body-sm" style="color:color-mix(in srgb, var(--off-white) 65%, transparent); margin-top:10px">
+                Proves dependency graphs are strictly acyclic. Detects transitive circular service calls that trigger distributed deadlocks under degraded states.
+              </p>
+            </div>
+            <div style="border-top:var(--hairline) solid color-mix(in srgb, var(--off-white) 10%, transparent); padding-top:12px;">
+              <span class="t-label">Condition: graph_cycles = 0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OUTCOMES / METRICS & PALANTIR DECK SVG CHART (INVERTED TO WHITE) -->
   <section class="on-white section" id="outcomes">
     <div class="container">
-      <span class="t-label reveal" style="display:block; margin-bottom:var(--space-m)">04 ——→ Verified Outcomes</span>
+      <span class="t-label reveal" style="display:block; margin-bottom:var(--space-m)">06 ——→ Verified Outcomes</span>
       <div class="metrics">
         <div class="metric reveal stagger-1">
           <div class="fig"><span class="u-emph count-num" data-target="100" data-suffix="%">0%</span></div>
@@ -628,6 +1022,46 @@
         </div>
       </div>
 
+      <!-- Hairline SVG Deck Comparison Chart -->
+      <div class="card card-dark reveal stagger-2" style="margin-top:var(--space-m); padding:36px 40px">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:var(--space-m); flex-wrap:wrap; gap:12px">
+          <div>
+            <span class="t-label" style="color:var(--off-white)">Failure Detection Lead-Time Window</span>
+            <h3 class="t-heading" style="color:var(--off-white); margin-top:4px">Pre-Execution Simulation vs Post-Mortem Alerting</h3>
+          </div>
+          <span class="t-label" style="color:var(--off-white)">Minutes Before Incident Impact</span>
+        </div>
+
+        <svg viewBox="0 0 1000 240" width="100%" style="display:block; overflow:visible; font-family:'Apercu Mono Pro', ui-monospace, monospace; font-weight:500">
+          <!-- Background gridlines -->
+          <line x1="120" y1="30" x2="950" y2="30" stroke="rgba(239, 239, 239, 0.12)" stroke-width="1" />
+          <line x1="120" y1="90" x2="950" y2="90" stroke="rgba(239, 239, 239, 0.12)" stroke-width="1" />
+          <line x1="120" y1="150" x2="950" y2="150" stroke="rgba(239, 239, 239, 0.12)" stroke-width="1" />
+          <line x1="120" y1="210" x2="950" y2="210" stroke="rgba(239, 239, 239, 0.25)" stroke-width="1" />
+
+          <!-- Y-axis Labels -->
+          <text x="105" y="36" fill="#A0A2A6" font-size="12" text-anchor="end">+10m Lead</text>
+          <text x="105" y="96" fill="#A0A2A6" font-size="12" text-anchor="end">+5m Lead</text>
+          <text x="105" y="156" fill="#A0A2A6" font-size="12" text-anchor="end">+1m Lead</text>
+          <text x="105" y="215" fill="#A0A2A6" font-size="12" text-anchor="end">0s Outage</text>
+
+          <!-- Bar 1: Static Linters -->
+          <rect x="220" y="206" width="120" height="4" fill="none" stroke="#EFEFEF" stroke-width="1" />
+          <text x="280" y="232" fill="#EFEFEF" font-size="11" text-anchor="middle">STATIC LINTERS</text>
+          <text x="280" y="196" fill="#A0A2A6" font-size="11" text-anchor="middle">0m (Syntax Only)</text>
+
+          <!-- Bar 2: APM Observability (Post-Incident Alert) -->
+          <rect x="460" y="200" width="120" height="10" fill="none" stroke="#EFEFEF" stroke-width="1" />
+          <text x="520" y="232" fill="#EFEFEF" font-size="11" text-anchor="middle">APM / LOGGING</text>
+          <text x="520" y="190" fill="#A0A2A6" font-size="11" text-anchor="middle">+0s (Post-Outage)</text>
+
+          <!-- Bar 3: OmniSim Continuous Invariant Gatekeeper -->
+          <rect x="700" y="30" width="140" height="180" fill="#EFEFEF" />
+          <text x="770" y="232" fill="#EFEFEF" font-size="11" text-anchor="middle">OMNISIM ENGINE</text>
+          <text x="770" y="22" fill="#EFEFEF" font-size="12" text-anchor="middle">+10 MIN PRE-MERGE</text>
+        </svg>
+      </div>
+
       <!-- Signature Palantir chamfered (异形) callout card -->
       <div class="card card-dark cut-tr reveal stagger-2" style="border-radius:0; margin-top:var(--space-m); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:var(--space-s)">
         <div>
@@ -645,7 +1079,7 @@
   <section class="on-paper-muted section" id="benchmarks">
     <div class="container">
       <div class="earmark t-label reveal" style="margin-bottom:var(--space-m)">
-        <span>05</span><span class="arrow"></span><span>Benchmark Validation</span>
+        <span>07</span><span class="arrow"></span><span>Benchmark Validation</span>
       </div>
       <h2 class="t-display-m reveal" style="margin-bottom:var(--space-m)">Empirical proof across mission-critical workloads.</h2>
 
@@ -772,7 +1206,7 @@
     </div>
   </footer>
 
-  <!-- SCRIPT: Scroll Reveals, Metric Counters, Oscilloscope, Particle Topology -->
+  <!-- SCRIPT: Scroll Reveals, Metric Counters, Interactive Mode Switcher, Oscilloscope, Particle Topology -->
   <script>
     // Arm reveal
     document.documentElement.classList.add('js');
@@ -832,6 +1266,40 @@
         }
       }
       requestAnimationFrame(step);
+    }
+
+    // Interactive Tab Switcher in Simulation Console
+    function switchSimTab(tab) {
+      document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('is-active'));
+      const waveBox = document.getElementById('waveform-box');
+      const graphBox = document.getElementById('graph-box');
+      const diffBox = document.getElementById('diff-box');
+
+      waveBox.style.display = 'none';
+      graphBox.style.display = 'none';
+      diffBox.style.display = 'none';
+
+      if (tab === 'waveform') {
+        document.getElementById('tab-waveform').classList.add('is-active');
+        waveBox.style.display = 'block';
+      } else if (tab === 'graph') {
+        document.getElementById('tab-graph').classList.add('is-active');
+        graphBox.style.display = 'block';
+      } else if (tab === 'diff') {
+        document.getElementById('tab-diff').classList.add('is-active');
+        diffBox.style.display = 'block';
+      }
+    }
+
+    // Table row selector
+    function selectRow(tr, id, title, tier, ceiling, headroom, status) {
+      document.querySelectorAll('.ops-table tr').forEach(row => row.classList.remove('is-selected'));
+      tr.classList.add('is-selected');
+
+      document.getElementById('inspect-id').innerText = id + ' \u00B7 Lineage Inspector';
+      document.getElementById('inspect-title').innerText = title;
+      document.getElementById('inspect-tier').innerText = tier + ' \u00B7 ' + ceiling;
+      document.getElementById('inspect-status').innerText = status;
     }
 
     // Particle Mesh Topology Background
@@ -978,7 +1446,7 @@
 
       document.getElementById('t3-lat').innerText = '15 ms';
       document.getElementById('t3-pool').innerText = optSat + '%';
-      document.getElementById('t3-pill').innerText = '0 Breaches &middot; Headroom ' + (100 - optSat) + '%';
+      document.getElementById('t3-pill').innerText = '0 Breaches \u00B7 Headroom ' + (100 - optSat) + '%';
     }
 
     document.addEventListener('DOMContentLoaded', () => {
