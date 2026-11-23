@@ -36,3 +36,4 @@ jobs:
           python -m omnisim.cli benchmark --domain systems --rollouts 50 --horizon 6
           python -m omnisim.cli terraform
           python -m omnisim.cli vc-gauntlet
+          python -m omnisim.cli dataset-benchmark

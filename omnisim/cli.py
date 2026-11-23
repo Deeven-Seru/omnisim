@@ -199,7 +199,7 @@ def main(argv: list[str] | None = None) -> None:
         argv = sys.argv[1:]
 
     # Default to 'simulate' if flags or no subcommands are passed directly
-    subcommands = {"simulate", "serve", "benchmark", "terraform", "vc-gauntlet"}
+    subcommands = {"simulate", "serve", "benchmark", "terraform", "vc-gauntlet", "dataset-benchmark"}
     if not argv or (argv[0] not in subcommands and argv[0] not in {"-h", "--help", "-v", "--version"}):
         argv = ["simulate"] + argv
 
@@ -228,9 +228,18 @@ def main(argv: list[str] | None = None) -> None:
     # vc-gauntlet command
     gauntlet_parser = subparsers.add_parser("vc-gauntlet", help="Run Ruthless VC Zero-Bias Diligence Gauntlet")
 
+    # dataset-benchmark command
+    dataset_parser = subparsers.add_parser("dataset-benchmark", help="Benchmark on real AWS CloudWatch public telemetry (NAB)")
+
     args = parser.parse_args(argv)
 
-    if args.command == "vc-gauntlet":
+    if args.command == "dataset-benchmark":
+        from benchmarks.public_dataset_nab_benchmark import PublicDatasetNABBenchmark
+        bench = PublicDatasetNABBenchmark()
+        report = bench.run_benchmark()
+        if not report.benchmark_passed:
+            sys.exit(1)
+    elif args.command == "vc-gauntlet":
         from benchmarks.ruthless_vc_gauntlet import RuthlessVCGauntlet
         gauntlet = RuthlessVCGauntlet()
         report = gauntlet.run_all()
