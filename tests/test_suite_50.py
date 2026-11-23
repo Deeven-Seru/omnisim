@@ -1,7 +1,7 @@
 """Unit test verifying the 50 Real-World Architecture Benchmark."""
 
 import unittest
-from benchmarks.real_world_50_benchmark import run_50_benchmark_evaluation
+from benchmarks.suite_50 import run_50_benchmark_evaluation
 
 
 class TestRealWorld50Benchmark(unittest.TestCase):

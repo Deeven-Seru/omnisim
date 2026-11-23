@@ -238,7 +238,13 @@ def main(argv: list[str] | None = None) -> None:
         argv = sys.argv[1:]
 
     # Default to 'simulate' if flags or no subcommands are passed directly
-    subcommands = {"simulate", "serve", "benchmark", "terraform", "vc-gauntlet", "dataset-benchmark", "canonical-benchmarks", "patch", "mcp-toolbox", "tensorflow", "tf-audit", "tf-zero-day"}
+    subcommands = {
+        "simulate", "serve", "benchmark", "terraform", "patch",
+        "robustness", "vc-gauntlet",
+        "telemetry", "dataset-benchmark",
+        "microservices", "canonical-benchmarks",
+        "mcp-toolbox", "tensorflow", "tf-audit", "tf-zero-day"
+    }
     if not argv or (argv[0] not in subcommands and argv[0] not in {"-h", "--help", "-v", "--version"}):
         argv = ["simulate"] + argv
 
@@ -284,37 +290,40 @@ def main(argv: list[str] | None = None) -> None:
     patch_parser.add_argument("--fail-on-violation", action="store_true", help="Exit with non-zero code if vulnerabilities are detected")
     patch_parser.add_argument("--output", "-o", type=str, default="", help="Write unified diff patch to output file")
 
-    # vc-gauntlet command
-    gauntlet_parser = subparsers.add_parser("vc-gauntlet", help="Run Ruthless VC Zero-Bias Diligence Gauntlet")
+    # robustness / vc-gauntlet command
+    robustness_parser = subparsers.add_parser("robustness", help="Run adversarial robustness and invariant boundary stress tests")
+    gauntlet_parser = subparsers.add_parser("vc-gauntlet", help="Run adversarial robustness stress tests (legacy alias)")
 
-    # dataset-benchmark command
-    dataset_parser = subparsers.add_parser("dataset-benchmark", help="Benchmark on real AWS CloudWatch public telemetry (NAB)")
+    # telemetry / dataset-benchmark command
+    telemetry_parser = subparsers.add_parser("telemetry", help="Benchmark telemetry against real AWS CloudWatch public telemetry (NAB)")
+    dataset_parser = subparsers.add_parser("dataset-benchmark", help="Benchmark on real AWS CloudWatch public telemetry (legacy alias)")
 
-    # canonical-benchmarks command
-    canonical_parser = subparsers.add_parser("canonical-benchmarks", help="Benchmark on Google Online Boutique, DeathStarBench, Train-Ticket, and GAIA")
+    # microservices / canonical-benchmarks command
+    microservices_parser = subparsers.add_parser("microservices", help="Benchmark reference microservices (Online Boutique, DeathStarBench, Train-Ticket, GAIA)")
+    canonical_parser = subparsers.add_parser("canonical-benchmarks", help="Benchmark reference microservices (legacy alias)")
 
     args = parser.parse_args(argv)
 
     if args.command == "tf-zero-day":
-        from benchmarks.tensorflow_unreported_latent_audit import TensorFlowLatentVulnerabilityAuditor, main as run_tf_zero_day
+        from benchmarks.tensorflow_latent import TensorFlowLatentVulnerabilityAuditor, main as run_tf_zero_day
         report = TensorFlowLatentVulnerabilityAuditor.run_latent_audit()
         if report.vulnerabilities_uncovered == 0:
             sys.exit(1)
         run_tf_zero_day()
     elif args.command == "tf-audit":
-        from benchmarks.tensorflow_current_state_audit import TensorFlowCurrentStateAuditor, main as run_tf_audit
+        from benchmarks.tensorflow_audit import TensorFlowCurrentStateAuditor, main as run_tf_audit
         report = TensorFlowCurrentStateAuditor.run_current_audit()
         if report.critical_breaches_predicted == 0:
             sys.exit(1)
         run_tf_audit()
     elif args.command == "tensorflow":
-        from benchmarks.tensorflow_historical_validation import TensorFlowHistoricalValidator, main as run_tf_validation
+        from benchmarks.tensorflow_historical import TensorFlowHistoricalValidator, main as run_tf_validation
         suite_report = TensorFlowHistoricalValidator.run_all()
         if suite_report.incidents_caught != suite_report.incidents_tested:
             sys.exit(1)
         run_tf_validation()
     elif args.command == "mcp-toolbox":
-        from benchmarks.mcp_toolbox_historical_validation import MultiReleaseMCPToolboxValidator, main as run_mcp_validation
+        from benchmarks.mcp_toolbox import MultiReleaseMCPToolboxValidator, main as run_mcp_validation
         suite_report = MultiReleaseMCPToolboxValidator.run_all()
         if suite_report.incidents_caught != suite_report.incidents_tested:
             sys.exit(1)
@@ -330,21 +339,21 @@ def main(argv: list[str] | None = None) -> None:
             fail_on_violation=getattr(args, "fail_on_violation", False),
             output_file=getattr(args, "output", "")
         )
-    elif args.command == "canonical-benchmarks":
-        from benchmarks.canonical_microservices_benchmark import CanonicalMicroservicesBenchmarkSuite
+    elif args.command in ("microservices", "canonical-benchmarks"):
+        from benchmarks.microservices import CanonicalMicroservicesBenchmarkSuite
         suite = CanonicalMicroservicesBenchmarkSuite()
         report = suite.run_all()
         if not report.all_passed:
             sys.exit(1)
-    elif args.command == "dataset-benchmark":
-        from benchmarks.public_dataset_nab_benchmark import PublicDatasetNABBenchmark
+    elif args.command in ("telemetry", "dataset-benchmark"):
+        from benchmarks.telemetry import PublicDatasetNABBenchmark
         bench = PublicDatasetNABBenchmark()
         report = bench.run_benchmark()
         if not report.benchmark_passed:
             sys.exit(1)
-    elif args.command == "vc-gauntlet":
-        from benchmarks.ruthless_vc_gauntlet import RuthlessVCGauntlet
-        gauntlet = RuthlessVCGauntlet()
+    elif args.command in ("robustness", "vc-gauntlet"):
+        from benchmarks.robustness import RobustnessBenchmarkSuite
+        gauntlet = RobustnessBenchmarkSuite()
         report = gauntlet.run_all()
         if not report.all_passed:
             sys.exit(1)

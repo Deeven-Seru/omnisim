@@ -1,9 +1,9 @@
-"""Ruthless Real-World End-to-End Stress Test for OmniSim.
+"""Production Systems End-to-End Scenario Test Suite.
 
-Simulates three intense enterprise personas:
-1. SRE / DevOps: E-Commerce Black Friday flash sale crash prevention using K8s manifests & Prometheus telemetry.
-2. Enterprise CFO: Pricing elasticity & competitive price-war cash runway simulation.
-3. Chaos Engineer / Pentester: Malformed payloads, zero-division hazards, and high-concurrency API hammering.
+Simulates three enterprise operational scenarios:
+1. SRE / DevOps: E-Commerce high-traffic scale event crash prevention using K8s manifests & Prometheus telemetry.
+2. Enterprise Strategy: Pricing elasticity & cash runway counterfactual simulation.
+3. Resilience & Invariants: Malformed payloads, division hazards, and high-concurrency API load.
 """
 
 from __future__ import annotations
@@ -22,10 +22,10 @@ from omnisim.ingest.telemetry import TelemetryIngester
 from omnisim.models.search import CounterfactualMCTS
 
 
-class TestRealWorldBattleScenarios(unittest.TestCase):
+class TestSystemScenarios(unittest.TestCase):
 
-    def test_sre_black_friday_catastrophe_prevention(self):
-        """REAL-WORLD USE CASE 1: SRE Black Friday Flash Sale.
+    def test_sre_high_traffic_catastrophe_prevention(self):
+        """REAL-WORLD USE CASE 1: SRE Traffic Spike Invariant Protection.
         
         The SRE imports their real multi-tier Kubernetes architecture:
         Ingress -> Gateway -> Order Service -> Postgres DB.

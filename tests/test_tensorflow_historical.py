@@ -1,7 +1,7 @@
 """Automated Test Suite for TensorFlow Blind Historical Validation."""
 
 import unittest
-from benchmarks.tensorflow_historical_validation import TensorFlowHistoricalValidator
+from benchmarks.tensorflow_historical import TensorFlowHistoricalValidator
 
 
 class TestTensorFlowHistoricalValidation(unittest.TestCase):

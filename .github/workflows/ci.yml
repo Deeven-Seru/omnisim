@@ -36,13 +36,14 @@ jobs:
           python -m omnisim.cli benchmark --domain systems --rollouts 50 --horizon 6
           python -m omnisim.cli terraform
           python -m omnisim.cli patch
-          python -m omnisim.cli vc-gauntlet
-          python -m omnisim.cli dataset-benchmark
-          python -m omnisim.cli canonical-benchmarks
+          python -m omnisim.cli robustness
+          python -m omnisim.cli telemetry
+          python -m omnisim.cli microservices
           python -m omnisim.cli mcp-toolbox
           python -m omnisim.cli tensorflow
           python -m omnisim.cli tf-audit
           python -m omnisim.cli tf-zero-day
+          python -m omnisim.cli vc-gauntlet
 
       - name: Verify GitHub Action Pre-Flight Gate
         uses: ./

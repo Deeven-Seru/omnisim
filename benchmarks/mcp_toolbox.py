@@ -265,7 +265,6 @@ class MultiReleaseMCPToolboxValidator:
     # --------------------------------------------------------------------------
     @classmethod
     def run_incident_2_connection_pool_leak(cls) -> ReleaseIncidentResult:
-        from benchmarks.mcp_toolbox_historical_validation import GoogleMCPToolboxHistoricalValidator
         rep = GoogleMCPToolboxHistoricalValidator.run_validation()
 
         return ReleaseIncidentResult(

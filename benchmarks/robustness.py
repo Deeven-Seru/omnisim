@@ -1,10 +1,10 @@
-"""Ruthless VC Gauntlet Benchmark Suite for OmniSim.
+"""Adversarial Robustness and Invariant Boundary Evaluation Suite for OmniSim.
 
-Executes a ruthless 5-tier evaluation of OmniSim:
+Executes a rigorous 5-tier evaluation of OmniSim:
 1. Blind Historical Replay (10 Real Disasters vs 100 Benign Deploys)
 2. Dirty Topology, Dark Debt & Epistemic Uncertainty
 3. Adversarial SRE Attack (10 Poison Action Traps)
-4. 15-Minute Zero-Consulting Automated Ingestion Benchmark
+4. Automated Zero-Consulting Ingestion Benchmark
 5. The Asymmetry-of-Being-Wrong Loss Function (Availability vs Cost)
 """
 
@@ -371,6 +371,11 @@ class RuthlessVCGauntlet:
         return selected_plan, selected_cost, risk_penalty_enforced
 
 
+# Formal clean aliases
+RobustnessReport = GauntletReport
+RobustnessBenchmarkSuite = RuthlessVCGauntlet
+
+
 if __name__ == "__main__":
-    gauntlet = RuthlessVCGauntlet()
+    gauntlet = RobustnessBenchmarkSuite()
     report = gauntlet.run_all()

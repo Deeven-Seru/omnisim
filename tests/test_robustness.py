@@ -1,15 +1,15 @@
-"""Automated Unit & Integration Test for the Ruthless VC Gauntlet."""
+"""Automated Unit & Integration Test for Adversarial Robustness Benchmark Suite."""
 
 import unittest
-from benchmarks.ruthless_vc_gauntlet import RuthlessVCGauntlet
+from benchmarks.robustness import RobustnessBenchmarkSuite, RuthlessVCGauntlet
 
 
-class TestRuthlessVCGauntlet(unittest.TestCase):
-    """Test suite validating OmniSim against the Ruthless VC 5-Tier Gauntlet."""
+class TestRobustnessBenchmark(unittest.TestCase):
+    """Test suite validating OmniSim against adversarial robustness and invariant boundaries."""
 
     @classmethod
     def setUpClass(cls):
-        cls.gauntlet = RuthlessVCGauntlet()
+        cls.gauntlet = RobustnessBenchmarkSuite()
         cls.report = cls.gauntlet.run_all()
 
     def test_tier_1_blind_replay_recall_and_precision(self):

@@ -1,7 +1,7 @@
 """Automated Regression Test for Google MCP Toolbox Multi-Release Historical Validation."""
 
 import unittest
-from benchmarks.mcp_toolbox_historical_validation import (
+from benchmarks.mcp_toolbox import (
     GoogleMCPToolboxHistoricalValidator,
     MultiReleaseMCPToolboxValidator,
 )

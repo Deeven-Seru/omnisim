@@ -1,7 +1,7 @@
 """Automated Test Suite for Canonical Microservice Reference Benchmarks."""
 
 import unittest
-from benchmarks.canonical_microservices_benchmark import CanonicalMicroservicesBenchmarkSuite
+from benchmarks.microservices import CanonicalMicroservicesBenchmarkSuite
 
 
 class TestCanonicalMicroservicesBenchmark(unittest.TestCase):

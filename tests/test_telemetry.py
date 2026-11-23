@@ -1,7 +1,7 @@
 """Automated Test Suite for Public Dataset Benchmark (NAB AWS CloudWatch)."""
 
 import unittest
-from benchmarks.public_dataset_nab_benchmark import PublicDatasetNABBenchmark
+from benchmarks.telemetry import PublicDatasetNABBenchmark
 
 
 class TestPublicDatasetNABBenchmark(unittest.TestCase):

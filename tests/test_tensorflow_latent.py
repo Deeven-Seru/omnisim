@@ -1,7 +1,7 @@
 """Automated Test Suite for OmniSim Discovery of Unreported Latent Defects in TensorFlow."""
 
 import unittest
-from benchmarks.tensorflow_unreported_latent_audit import TensorFlowLatentVulnerabilityAuditor
+from benchmarks.tensorflow_latent import TensorFlowLatentVulnerabilityAuditor
 
 
 class TestTensorFlowLatentAudit(unittest.TestCase):

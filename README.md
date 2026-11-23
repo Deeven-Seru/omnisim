@@ -182,15 +182,15 @@ if not audit["passed"]:
 Run simulation across Google Cloud Online Boutique (11 services), Cornell DeathStarBench (7 services), Fudan Train-Ticket (7 services), and Tsinghua GAIA (4 services):
 
 ```bash
-python3 -m omnisim.cli canonical-benchmarks
+python3 -m omnisim.cli microservices
 ```
 
-### Public Dataset Benchmark (Real AWS CloudWatch Telemetry)
+### Telemetry Benchmark (Real AWS CloudWatch Metrics)
 
 Run empirical verification against 8,000+ real-world AWS CloudWatch data points from the Numenta Anomaly Benchmark (NAB):
 
 ```bash
-python3 -m omnisim.cli dataset-benchmark
+python3 -m omnisim.cli telemetry
 ```
 
 ### Google Cloud MCP Toolbox Historical Validation
@@ -209,12 +209,12 @@ Test OmniSim's blind foresight against Google's flagship machine learning engine
 python3 -m omnisim.cli tensorflow
 ```
 
-### Ruthless VC Zero-Bias Diligence Gauntlet
+### Adversarial Robustness Benchmark Suite
 
-Run the 5-phase institutional stress test (Blind Historical Replay, Dark Debt & Uncertainty, Adversarial SRE Traps, Zero-Consulting Ingestion, Asymmetric Loss Function):
+Run the 5-phase institutional stress test (Blind Historical Replay, Dark Debt & Uncertainty, Adversarial SRE Traps, Automated Ingestion, Asymmetric Loss Function):
 
 ```bash
-python3 -m omnisim.cli vc-gauntlet
+python3 -m omnisim.cli robustness
 ```
 
 ### Execute Test Suite
@@ -245,15 +245,13 @@ OmniSim has been benchmarked directly against real-world catastrophic failure po
   * *Status Quo:* Instant fire at Step 1 under 300 concurrent requests on t2.micro RDS.
   * *OmniSim Remediation:* Sized RDS instance class to r6g.large with connection limit 1,365; pool saturation kept below 52%.
 
-See [tests/test_github_real_validation.py](tests/test_github_real_validation.py) for reproducible test fixtures.
+See [tests/test_github_validation.py](tests/test_github_validation.py) for reproducible test fixtures.
 
 ---
 
-## 5. Research Paper & Due Diligence
+## 5. Research Paper & Architecture
 
-* **Academic Paper (PhD Level):** [OmniSim: Universal Counterfactual Simulation Engine (PDF)](paper/omnisim_paper.pdf) | [Markdown Version](paper/omnisim_paper.md) | [LaTeX Source](paper/omnisim_paper.tex)
-* **Investor Memo & Thesis:** [INVESTOR_MEMO.md](INVESTOR_MEMO.md)
-* **Enterprise Business Plan & GTM:** [BUSINESS_PLAN.md](BUSINESS_PLAN.md)
+* **Academic Paper:** [OmniSim: Universal Counterfactual Simulation Engine (PDF)](paper/omnisim_paper.pdf) | [Markdown Version](paper/omnisim_paper.md) | [LaTeX Source](paper/omnisim_paper.tex)
 * **System Architecture Specification:** [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ---

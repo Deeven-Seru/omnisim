@@ -1,7 +1,7 @@
 """Automated Test Suite for OmniSim Blind Audit of Current TensorFlow State."""
 
 import unittest
-from benchmarks.tensorflow_current_state_audit import TensorFlowCurrentStateAuditor
+from benchmarks.tensorflow_audit import TensorFlowCurrentStateAuditor
 
 
 class TestTensorFlowCurrentStateAudit(unittest.TestCase):

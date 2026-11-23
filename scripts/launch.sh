@@ -29,4 +29,4 @@ fi
 echo "=========================================================="
 echo "Starting OmniSim Reactive Marimo Dashboard..."
 echo "=========================================================="
-marimo edit notebooks/omnisim_blackwell.py
+marimo edit notebooks/interactive.py
