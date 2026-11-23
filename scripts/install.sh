@@ -6,7 +6,7 @@ set -euo pipefail
 
 INSTALL_DIR="${HOME}/.local/share/omnisim"
 BIN_DIR="${HOME}/.local/bin"
-RELEASE_URL="https://github.com/Deeven-Seru/omnisim/releases/download/v1.0.0/omnisim-1.0.0-py3-none-any.whl"
+RELEASE_URL="https://github.com/Deeven-Seru/omnisim/releases/download/v1.0.0/omnisim_engine-1.0.0-py3-none-any.whl"
 
 echo "=== Installing OmniSim CLI (v1.0.0) ==="
 

@@ -1,5 +1,5 @@
 [project]
-name = "omnisim"
+name = "omnisim-engine"
 version = "1.0.0"
 description = "OmniSim: The Universal Counterfactual Simulation Engine - Beyond Probabilistic Text Generation to Action-Conditioned World Simulation"
 readme = "README.md"
@@ -41,6 +41,9 @@ Documentation = "https://github.com/Deeven-Seru/omnisim#readme"
 
 [project.scripts]
 omnisim = "omnisim.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["omnisim"]
 
 [project.optional-dependencies]
 accelerated = [

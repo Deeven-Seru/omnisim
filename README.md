@@ -87,10 +87,10 @@ OmniSim can be installed across multiple package managers and environments:
 
 ```bash
 # Direct from PyPI
-pip install omnisim
+pip install omnisim-engine
 
 # Or directly from the GitHub Release Wheel
-pip install https://github.com/Deeven-Seru/omnisim/releases/download/v1.0.0/omnisim-1.0.0-py3-none-any.whl
+pip install https://github.com/Deeven-Seru/omnisim/releases/download/v1.0.0/omnisim_engine-1.0.0-py3-none-any.whl
 
 # Or from source
 pip install git+https://github.com/Deeven-Seru/omnisim.git
