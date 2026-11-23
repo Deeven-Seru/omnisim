@@ -287,11 +287,10 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
 
     if args.command == "mcp-toolbox":
-        from benchmarks.mcp_toolbox_historical_validation import GoogleMCPToolboxHistoricalValidator
-        report = GoogleMCPToolboxHistoricalValidator.run_validation()
-        if not report.vulnerability_detected or not report.remediation_is_exact_match_to_future_fix:
+        from benchmarks.mcp_toolbox_historical_validation import MultiReleaseMCPToolboxValidator, main as run_mcp_validation
+        suite_report = MultiReleaseMCPToolboxValidator.run_all()
+        if suite_report.incidents_caught != suite_report.incidents_tested:
             sys.exit(1)
-        from benchmarks.mcp_toolbox_historical_validation import main as run_mcp_validation
         run_mcp_validation()
     elif args.command == "patch":
         hcl_content = ""
