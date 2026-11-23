@@ -1,0 +1,118 @@
+/*
+ * palantir-design — typeface loader.
+ * Drop this file + the /fonts folder into any build and import it once:
+ *     <link rel="stylesheet" href="fonts.css">  ·  or  ·  @import "fonts.css";
+ *
+ * Family names match the tokens in tokens.css / DESIGN.md exactly:
+ *   --font-display → "Alliance No.2"   --font-body → "Alliance No.1"
+ *   --font-mono    → "Apercu Mono Pro"
+ *
+ * ── Licensed vs open: how this file degrades gracefully ───────────────────
+ * Alliance No.1 / No.2 (Degarism) and Apercu Mono Pro (Colophon) are
+ * COMMERCIAL faces. They are NOT redistributed with this repo — the matching
+ * .woff2 are .gitignored, so a fresh clone will NOT contain them. See FONTS.md.
+ *
+ *   • IF you have a license: drop the .woff2 into ./fonts/ (exact names below)
+ *     and the @font-face rules in this file pick them up automatically.
+ *   • IF you do NOT (the default fresh-clone state): each @font-face below
+ *     simply fails to load its missing file, and the browser falls through the
+ *     var(--font-*) stacks in tokens.css to the next available family. To make
+ *     that fallback faithful (Inter for Alliance, JetBrains Mono for Apercu)
+ *     uncomment the OPTIONAL block at the bottom of this file — it pulls those
+ *     open faces and aliases the licensed family names onto them, so the design
+ *     renders on a plain clone-and-open with no local files.
+ *
+ * Coverage when the licensed faces ARE present (full set — no gaps):
+ *   Alliance No.2 (display) ....... 400 Regular, 300 Light
+ *   Alliance No.1 (body) .......... 400 Regular + 400 Italic, 300 Light
+ *   Apercu Mono Pro (labels) ...... 400, 500 Medium, 700   (LATTICE uses 500)
+ *
+ * NOTE: bilingual 中文 coverage (PingFang SC / Noto Sans SC) is handled by the
+ * tokens.css stacks + the page-level Noto Sans SC @import, not here. This file
+ * only loads the Latin display/body/mono roles.
+ */
+
+/* ---------- OPEN FALLBACK WEBFONTS (active by default) ----------
+ * Inter (→ Alliance) + JetBrains Mono (→ Apercu) load so a fresh clone with NO
+ * licensed .woff2 still renders a real grotesque + mono — the tokens.css stacks
+ * name "Inter" / "JetBrains Mono" right after the licensed families, so when the
+ * licensed faces ARE present (below) they win, and when they're absent these take
+ * over. @import MUST precede @font-face. For offline/privacy builds, self-host
+ * these (SIL OFL) and swap this @import for local @font-face rules. See FONTS.md. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap");
+
+/* ---------- Alliance No.2 · display / headlines ---------- */
+@font-face {
+  font-family: "Alliance No.2";
+  src: url("fonts/AllianceNo2-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Alliance No.2";
+  src: url("fonts/AllianceNo2-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: block;
+}
+
+/* ---------- Alliance No.1 · body (Light 300, Regular 400 + italic) ---------- */
+@font-face {
+  font-family: "Alliance No.1";
+  src: url("fonts/AllianceNo1-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Alliance No.1";
+  src: url("fonts/AllianceNo1-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Alliance No.1";
+  src: url("fonts/AllianceNo1-Italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: block;
+}
+
+/* ---------- Apercu Mono Pro · tracked-out earmark labels ---------- */
+@font-face {
+  font-family: "Apercu Mono Pro";
+  src: url("fonts/ApercuMonoPro-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Apercu Mono Pro";
+  src: url("fonts/ApercuMonoPro-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Apercu Mono Pro";
+  src: url("fonts/ApercuMonoPro-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+
+/* ==========================================================================
+ * HOW THE FALLBACK RESOLVES (no action needed)
+ * --------------------------------------------------------------------------
+ * The @import at the top loads Inter + JetBrains Mono (open, SIL OFL 1.1). The
+ * tokens.css stacks name them directly, right after the licensed families:
+ *     --font-display: "Alliance No.2", "Inter", "PingFang SC", …
+ *     --font-mono:    "Apercu Mono Pro", "JetBrains Mono", "PingFang SC", …
+ * So: licensed faces present in ./fonts/  →  they win; absent  →  Inter /
+ * JetBrains Mono render (a real grotesque + mono), never a CJK face's Latin.
+ * 中文 always resolves via the page-level Noto Sans SC @import + the stacks.
+ * For offline / air-gapped builds, self-host Inter + JetBrains Mono and replace
+ * the @import above with local @font-face rules. See FONTS.md.
+ * ========================================================================== */

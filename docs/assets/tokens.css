@@ -1,0 +1,464 @@
+/* =====================================================================
+   EDITORIAL SYSTEMS — design tokens
+   A high-contrast, monochrome, neo-grotesque design language.
+   Inspired by the "operating system for serious institutions" aesthetic.
+   Bilingual (Latin + 中文) ready.
+
+   Load order (canonical — matches SKILL.md §2):
+     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+     <link rel="stylesheet" href="fonts.css">   (self-hosted Alliance / Apercu Mono)
+     <link rel="stylesheet" href="tokens.css">   (this file; deck.css / print.css layer on top)
+   ===================================================================== */
+
+:root {
+  /* ---------- INK & SURFACE ---------------------------------------- */
+  --ink:               #1E2124;   /* primary text on light, button fill, hairline borders */
+  --surface-dark:      #0D0E10;   /* signature near-black — hero & dark sections */
+  --surface-navy:      #1E1F2B;   /* desaturated navy — product surfaces */
+  --surface-charcoal:  #202426;   /* warm charcoal — lightest of the darks */
+  --white:             #FFFFFF;   /* paper-white surface */
+  --off-white:         #EFEFEF;   /* headline color ON dark — never pure white */
+  --paper:             #F9F9F9;   /* soft light section background */
+  --paper-muted:       #F3F3F3;   /* muted panel / hover fill */
+
+  /* ---------- TEXT TINTS ------------------------------------------- */
+  --text-medium:       #636363;   /* secondary text, footnotes */
+  --text-light:        #767676;   /* captions, disclaimers */
+
+  /* ---------- ACCENT — technical / blueprint palette --------------
+     Monochrome stays the DEFAULT. Deliberately LOW chroma — these read as
+     muted slate / steel, never electric. They only ever appear as soft glows
+     on the blueprint plane, never as a flat decorative fill. Shared lightness,
+     low shared chroma, hue fanned slate-periwinkle → steel → gray-lilac. */
+  --accent-indigo: oklch(0.60 0.055 278);   /* muted slate-periwinkle — primary */
+  --accent-blue:   oklch(0.62 0.05 248);    /* muted steel blue — secondary */
+  --accent-lilac:  oklch(0.80 0.03 285);    /* soft gray-lilac — cube tops / fills */
+
+  /* ---------- FUNCTIONAL (use sparingly) -------------------------- */
+  --link:              oklch(0.56 0.07 268);  /* understated indigo-slate — links / hover only */
+  --error:             oklch(0.40 0.09 352);   /* deep wine red — validation only */
+  --border-input:      #636363;
+  --focus-ring:        var(--link);   /* keyboard :focus-visible ring — flips to off-white on dark */
+  /* NOTE: accent/link/error are authored in oklch (wider gamut, finer muted control).
+     examples/DESIGN.md ships their exact sRGB-hex projection (link #63739E ·
+     accent-indigo #787DA1 · accent-blue #6F89A3 · accent-lilac #BBBBD1 ·
+     error #6B314D) so Google's hex-only `design.md lint` passes. */
+
+  /* ---------- TYPE FAMILIES ---------------------------------------- */
+  /* Per-glyph fallback: Latin renders in Alliance / Apercu, 中文 falls through
+     to the matched neo-grotesque hei. PingFang SC (苹方) is preferred — the
+     cleanest, most refined hei — with Noto Sans SC as the web-safe fallback for
+     non-Apple devices (PingFang ships only on macOS / iOS). */
+  /* Latin → Alliance, then the open fallback Inter (loaded by fonts.css), then the
+     中文 hei via per-glyph fallback. Mono → Apercu, then JetBrains Mono. So a clone
+     with no licensed .woff2 still renders a real grotesque, not a CJK face's Latin. */
+  --font-display: "Alliance No.2", "Inter", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --font-body:    "Alliance No.1", "Inter", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --font-mono:    "Apercu Mono Pro", "JetBrains Mono", "PingFang SC", "Noto Sans SC", ui-monospace, monospace;
+
+  /* ---------- TYPE SCALE (desktop; root ≈ 18px) -------------------- */
+  /* Display tracking is tight and leading near-1 — measured from live palantir.com
+     (hero ≈ -0.0425em / lh ≈ 0.98). Hierarchy is SIZE, never weight. */
+  --fs-display-xl: 100px;   --lh-display-xl: 1.0;    --ls-display-xl: -0.04em;
+  --fs-display-l:  68px;    --lh-display-l:  1.05;   --ls-display-l:  -0.035em;
+  --fs-display-m:  50px;    --lh-display-m:  1.05;   --ls-display-m:  -0.03em;
+  --fs-heading:    34px;    --lh-heading:    1.15;   --ls-heading:    -0.02em;
+  --fs-title:      20px;    --lh-title:      1.3;
+  --fs-body:       18px;    --lh-body:       1.39;
+  --fs-body-sm:    16px;    --lh-body-sm:    1.43;
+  --fs-label:      11px;    --lh-label:      1.6;    --ls-label:      0.05em;
+  /* 中文 earmarks need MORE tracking (no uppercase to lean on): */
+  --ls-label-cjk:  0.18em;
+
+  /* ---------- SPACING --------------------------------------------- */
+  --space-tiny:    3px;
+  --space-xs:      10px;
+  --space-s:       20px;
+  --gutter:        30px;
+  --space-m:       60px;
+  --space-section: 100px;
+  --space-l:       120px;
+
+  /* ---------- RADII (Palantir rounds nearly everything) ---------- */
+  --r-sharp: 0px;     /* hairline rules / dividers ONLY — the one sharp thing */
+  --r-bar:   5px;     /* chart bars, small elements — softly rounded */
+  --r-control: 10px;  /* inputs, small panels / boxes */
+  --r-media: 16px;    /* photography / image corners */
+  --r-card:  20px;    /* content & metric cards */
+  --r-pill:  999px;   /* buttons, tags, markers, status pills, the ring */
+  --r-none:  0px;     /* alias of --r-sharp (back-compat) */
+
+  /* ---------- LAYOUT ---------------------------------------------- */
+  --max-width: 1440px;
+  --nav-height: 86px;
+
+  /* ---------- HAIRLINE -------------------------------------------- */
+  --hairline: 1px;
+}
+
+/* =====================================================================
+   BASE
+   ===================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  font-weight: 400;
+  color: var(--ink);
+  background: var(--white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Dark surfaces invert: headlines become OFF-white, never pure white.
+   Six surfaces, not two — the "≥3 distinct surfaces" depth bar needs the
+   charcoal & paper-muted planes to be real utilities, not hand-rolled inline. */
+.on-dark        { background: var(--surface-dark);     color: var(--off-white); }
+.on-navy        { background: var(--surface-navy);     color: var(--off-white); }
+.on-charcoal    { background: var(--surface-charcoal); color: var(--off-white); }
+.on-paper       { background: var(--paper);            color: var(--ink); }
+.on-paper-muted { background: var(--paper-muted);      color: var(--ink); }
+.on-white       { background: var(--white);            color: var(--ink); }
+/* On any dark surface, the keyboard focus ring flips to off-white for contrast. */
+.on-dark, .on-navy, .on-charcoal { --focus-ring: var(--off-white); }
+
+/* =====================================================================
+   TYPE UTILITIES
+   Weight is 400 EVERYWHERE for display & body. Hierarchy = size, not weight.
+   ===================================================================== */
+.t-display-xl { font-family: var(--font-display); font-size: var(--fs-display-xl); line-height: var(--lh-display-xl); letter-spacing: var(--ls-display-xl); font-weight: 400; margin: 0; }
+.t-display-l  { font-family: var(--font-display); font-size: var(--fs-display-l);  line-height: var(--lh-display-l);  letter-spacing: var(--ls-display-l);  font-weight: 400; margin: 0; }
+.t-display-m  { font-family: var(--font-display); font-size: var(--fs-display-m);  line-height: var(--lh-display-m);  letter-spacing: var(--ls-display-m);  font-weight: 400; margin: 0; }
+.t-heading    { font-family: var(--font-body);    font-size: var(--fs-heading);    line-height: var(--lh-heading);    letter-spacing: var(--ls-heading);    font-weight: 400; margin: 0; }
+.t-title      { font-family: var(--font-body);    font-size: var(--fs-title);      line-height: var(--lh-title);      font-weight: 400; margin: 0; }
+.t-body       { font-family: var(--font-body);    font-size: var(--fs-body);       line-height: var(--lh-body);       font-weight: 400; margin: 0; }
+.t-body-sm    { font-family: var(--font-body);    font-size: var(--fs-body-sm);    line-height: var(--lh-body-sm);    font-weight: 400; margin: 0; }
+
+/* The signature earmark label — UPPERCASE, tracked-out mono. */
+.t-label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  line-height: var(--lh-label);
+  letter-spacing: var(--ls-label);
+  font-weight: 500;
+  text-transform: uppercase;
+  /* Theme-safe + WCAG-safe: a 60% mix of the surface ink, not a fixed gray.
+     On dark this is off-white@60% (passes AA at 11px), on light ink@60%. */
+  color: color-mix(in srgb, currentColor 60%, transparent);
+}
+/* Apply when the label contains 中文 — looser tracking, no uppercase. */
+.t-label.is-cjk { letter-spacing: var(--ls-label-cjk); text-transform: none; }
+
+/* CJK display sizing aid: Chinese hei reads optically lighter than Alliance at
+   huge sizes — nudge weight up and relax negative tracking on Chinese-heavy
+   display lines by adding .cjk-display to the element. */
+.cjk-display { font-weight: 500; letter-spacing: -0.005em; }
+
+/* Underline = emphasis. The single most recognizable typographic move.
+   Use instead of bolding or coloring. */
+.u-emph {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-skip-ink: none;
+}
+
+a { color: var(--link); text-decoration: none; }
+a:hover { opacity: 0.5; }
+
+/* Keyboard focus — a visible ring on every interactive primitive (WCAG 2.4.7 AA).
+   :where() keeps specificity 0 so component styles still win for non-focus states.
+   The ring color is --focus-ring, which flips to off-white on dark surfaces above. */
+:where(a, .btn, .pill, .tag, .input, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* =====================================================================
+   LAYOUT HELPERS
+   ===================================================================== */
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: max(var(--gutter), calc((100% - var(--max-width)) / 2));
+}
+.grid-12 {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(10px, 1fr));
+  gap: var(--gutter);
+}
+.section { padding-block: var(--space-section); }
+.stack-s  > * + * { margin-top: var(--space-s); }
+.stack-m  > * + * { margin-top: var(--space-m); }
+
+/* =====================================================================
+   MOTIFS — thin geometric line-work (1px strokes, never fills)
+   ===================================================================== */
+/* Outline ring — generic geometric motif (NOT a logomark). */
+.ring {
+  border: var(--hairline) solid currentColor;
+  border-radius: var(--r-pill);
+  aspect-ratio: 1;
+  display: inline-block;
+}
+/* Long connector arrow used between an earmark number and its label. */
+.arrow::after { content: "——→"; letter-spacing: -0.1em; }
+
+/* Hairline divider drawn in currentColor (ink on light, off-white on dark). */
+.rule { border: 0; border-top: var(--hairline) solid currentColor; opacity: 0.25; margin: 0; }
+
+/* =====================================================================
+   COMPONENTS
+   ===================================================================== */
+/* Buttons — PILL (999px). Hierarchy from fill, not radius. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-body);
+  font-size: var(--fs-body-sm);
+  font-weight: 400;
+  line-height: 1;
+  border-radius: var(--r-pill);
+  padding: 14px 22px;
+  border: var(--hairline) solid transparent;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, opacity 120ms ease;
+  text-decoration: none;
+}
+.btn-primary   { background: var(--ink);   color: var(--white); border-color: var(--ink); }
+.btn-primary:hover   { background: var(--surface-dark); }
+.btn-secondary { background: transparent;  color: var(--ink);   border-color: var(--ink); }
+.btn-secondary:hover { background: var(--ink); color: var(--white); }
+.btn-ghost     { background: transparent;  color: inherit;      border-color: transparent; padding: 0; }
+.btn-ghost:hover { opacity: 0.5; }
+/* On dark surfaces, flip the secondary outline to the off-white ink. */
+.on-dark .btn-secondary, .on-navy .btn-secondary { color: var(--off-white); border-color: var(--off-white); }
+.on-dark .btn-secondary:hover, .on-navy .btn-secondary:hover { background: var(--off-white); color: var(--ink); }
+.on-dark .btn-primary, .on-navy .btn-primary { background: var(--off-white); color: var(--ink); border-color: var(--off-white); }
+.on-dark .btn-primary:hover, .on-navy .btn-primary:hover { opacity: 0.85; }
+
+/* Cards — large radius for CONTENT (contrast with square interface). */
+.card { border-radius: var(--r-card); padding: 40px; }
+.card-light { background: var(--paper);        color: var(--ink); }
+.card-dark  { background: var(--surface-dark); color: var(--off-white); }
+.card-outline { background: transparent; border: var(--hairline) solid currentColor; }
+
+/* Clipped-corner (异形) — the Palantir chamfered-corner card. A signature motif:
+   one corner is sliced on a diagonal, revealing the surface behind. Apply to a
+   FILLED card (.card-dark/.card-light or a custom fill); clip-path also clips the
+   border, so cut cards are fill-defined, not hairline-bordered. Pair with sharp
+   corners (override border-radius:0) — the chamfer is the point, not a radius.
+   Variants cut a different corner; --cut sets the slice size. */
+.cut-tr { --cut: 24px; clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%); }
+.cut-tl { --cut: 24px; clip-path: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%, 0 var(--cut)); }
+.cut-br { --cut: 24px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%); }
+
+/* Earmark — number + arrow + section name. */
+.earmark { display: inline-flex; align-items: baseline; gap: var(--space-xs); }
+
+/* Pill / ring marker — circular numbered badge or status pill. */
+.pill {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: var(--r-pill);
+  border: var(--hairline) solid currentColor;
+  font-family: var(--font-mono); font-size: var(--fs-label);
+  letter-spacing: var(--ls-label); text-transform: uppercase; font-weight: 500;
+  padding: 6px 12px;
+}
+.pill-num { width: 2.4em; height: 2.4em; padding: 0; }
+
+/* Inputs — rounded 10px (--r-control), 1px border. */
+.input {
+  font-family: var(--font-body); font-size: var(--fs-body-sm);
+  color: var(--ink); background: var(--white);
+  border: var(--hairline) solid var(--border-input);
+  border-radius: var(--r-control);
+  padding: 12px 16px; width: 100%;
+}
+.input::placeholder { color: var(--text-light); }
+.input:focus { border-color: var(--ink); }   /* focus ring added by :focus-visible above — do NOT outline:none */
+
+/* Tag — square, hairline. */
+.tag {
+  display: inline-block; font-family: var(--font-mono);
+  font-size: var(--fs-label); letter-spacing: var(--ls-label);
+  text-transform: uppercase; font-weight: 500;
+  border: var(--hairline) solid currentColor; border-radius: var(--r-pill);
+  padding: 4px 10px;
+}
+
+/* =====================================================================
+   DATA-VIZ — hairline instruments. Outlined bars, dot grids.
+   Never filled, never colorful, never gridded. Labels are mono.
+   ===================================================================== */
+/* Outlined bar chart: set each .bar-fig height as a % (e.g. style="height:66%").
+   The % resolves against a dedicated .bar-track so tall bars are never clamped;
+   the value label floats above the bar (absolute) and never steals plot height. */
+.bars { display: flex; align-items: flex-end; gap: var(--space-s); height: 220px; border-bottom: var(--hairline) solid currentColor; }
+.bars .bar-col { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; height: 100%; }
+.bars .bar-track { flex: 1 1 0; min-height: 0; width: 100%; display: flex; align-items: flex-end; padding-top: 26px; }
+.bars .bar-fig { position: relative; width: 100%; border: var(--hairline) solid currentColor; border-bottom: 0; flex-shrink: 0; }
+.bars .bar-val { position: absolute; bottom: 100%; left: 0; right: 0; margin-bottom: 6px; text-align: center; font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: var(--ls-label); color: color-mix(in srgb, currentColor 65%, transparent); }
+.bars .bar-lbl { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: uppercase; color: color-mix(in srgb, currentColor 65%, transparent); }
+
+/* Dot grid: 1 dot = 1 unit. .hollow marks the remainder. */
+.dotgrid { display: grid; grid-template-columns: repeat(20, 1fr); gap: 10px; max-width: 360px; }
+.dotgrid .dot { aspect-ratio: 1; border-radius: var(--r-pill); background: currentColor; }
+.dotgrid .dot.hollow { background: transparent; border: var(--hairline) solid currentColor; }
+
+/* LIGHT / EDITORIAL bar treatment — solid fill + faint gridlines. The INVERSE of
+   the dark hairline instrument above: real Palantir uses hairline-OUTLINED bars on
+   dark surfaces, and SOLID ink-FILLED bars + faint gridlines on light/paper. Add
+   .bars-filled (and optionally .bars-grid) to a .bars row. For a precise chart with
+   a $-scale y-axis + value labels, use the SVG recipe in references/data-viz.md
+   (see assets/templates/metrics.html "light treatment"); labels there are grotesque,
+   not mono, to match the editorial register. */
+.bars-filled .bar-fig { background: currentColor; border: 0; border-radius: var(--r-bar) var(--r-bar) 0 0; }
+.bars-grid { background-image: repeating-linear-gradient(to top, color-mix(in srgb, currentColor 10%, transparent) 0 1px, transparent 1px 25%); }
+
+/* =====================================================================
+   GLASS — frosted panels. Use SPARINGLY and ONLY over imagery or a
+   blueprint surface (a nav over a hero, an overlay label card). Never as a
+   decorative card on a plain section — the flat system rules there.
+   ===================================================================== */
+.glass {
+  background: color-mix(in srgb, var(--surface-dark) 55%, transparent);
+  -webkit-backdrop-filter: blur(22px) saturate(1.3);
+  backdrop-filter: blur(22px) saturate(1.3);
+  border: var(--hairline) solid color-mix(in srgb, var(--off-white) 14%, transparent);
+  color: var(--off-white);
+}
+.glass-light {
+  background: color-mix(in srgb, var(--white) 62%, transparent);
+  -webkit-backdrop-filter: blur(22px) saturate(1.1);
+  backdrop-filter: blur(22px) saturate(1.1);
+  border: var(--hairline) solid color-mix(in srgb, var(--ink) 10%, transparent);
+  color: var(--ink);
+}
+
+/* =====================================================================
+   BLUEPRINT — the isometric "data plane" atmosphere: near-black ground,
+   a faint iso lattice, glowing accent wireframes. The hero illustration
+   itself is a real RENDERED ASSET; this is the texture + the glowing-node
+   and label system that surrounds it (and a CSS stand-in for the plane).
+   ===================================================================== */
+.blueprint {
+  position: relative;
+  background-color: #0B0C10;
+  background-image:
+    repeating-linear-gradient(30deg,  color-mix(in srgb, var(--accent-indigo) 8%, transparent) 0 1px, transparent 1px 58px),
+    repeating-linear-gradient(-30deg, color-mix(in srgb, var(--accent-blue)   8%, transparent) 0 1px, transparent 1px 58px);
+  color: var(--off-white);
+  overflow: hidden;
+}
+.blueprint::after { /* vignette — focus the center, fade the lattice at the edges */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(120% 95% at 50% 42%, transparent 38%, #0B0C10 100%);
+}
+.blueprint > * { position: relative; z-index: 1; }
+
+/* Glowing wireframe label node (mono). .blue swaps the hue. Glow is deliberately soft. */
+.bp-node {
+  display: inline-flex; align-items: center; gap: 8px; padding: 9px 13px; border-radius: 4px;
+  font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: var(--ls-label);
+  text-transform: uppercase; color: var(--off-white);
+  background: color-mix(in srgb, var(--accent-indigo) 10%, #0B0C10);
+  border: var(--hairline) solid color-mix(in srgb, var(--accent-indigo) 42%, transparent);
+  box-shadow: 0 0 20px -8px color-mix(in srgb, var(--accent-indigo) 38%, transparent),
+              inset 0 0 12px -7px color-mix(in srgb, var(--accent-indigo) 34%, transparent);
+}
+.bp-node.blue {
+  background: color-mix(in srgb, var(--accent-blue) 10%, #0B0C10);
+  border-color: color-mix(in srgb, var(--accent-blue) 42%, transparent);
+  box-shadow: 0 0 20px -8px color-mix(in srgb, var(--accent-blue) 38%, transparent),
+              inset 0 0 12px -7px color-mix(in srgb, var(--accent-blue) 34%, transparent);
+}
+
+/* Isometric tile field — a CSS stand-in for the rendered data-plane art. */
+.iso-field {
+  display: grid; grid-template-columns: repeat(4, 84px); gap: 16px; justify-content: center;
+  transform: rotateX(55deg) rotateZ(45deg); transform-style: preserve-3d;
+}
+.iso-tile {
+  width: 84px; height: 84px; border-radius: 6px;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--accent-lilac) 14%, #15161D), #0E0F14);
+  border: var(--hairline) solid color-mix(in srgb, var(--accent-indigo) 38%, transparent);
+  box-shadow: 0 0 18px -9px color-mix(in srgb, var(--accent-indigo) 40%, transparent);
+}
+.iso-tile.b {
+  border-color: color-mix(in srgb, var(--accent-blue) 40%, transparent);
+  box-shadow: 0 0 18px -9px color-mix(in srgb, var(--accent-blue) 42%, transparent);
+}
+.iso-tile.raise { transform: translateZ(22px); }
+
+/* =====================================================================
+   DECK CHART NOTE
+   For the investor-deck bar chart (y-axis scale + right tick rail + dashed
+   "+%" growth connector + a filled "current" bar), build a single inline
+   <svg> with one coordinate system — see examples/metrics.html. A CSS+overlay
+   construction cannot know the real bar-top positions, so the connector and
+   ticks drift; the SVG keeps every coordinate exact. The .bars primitive above
+   stays for simple inline bar charts without a connector.
+   ===================================================================== */
+
+/* =====================================================================
+   PHASE / "MARKETECTURE" BOXES — four states told by border treatment
+   alone (solid → dashed → striped → filled). A signature diagram pattern.
+   ===================================================================== */
+.phase { border-radius: 10px; padding: 22px 24px; min-height: 92px; }
+.phase .lbl { display: block; margin-bottom: 10px; font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: uppercase; color: color-mix(in srgb, currentColor 65%, transparent); }
+.phase-solid  { border: var(--hairline) solid currentColor; }
+.phase-dashed { border: var(--hairline) dashed currentColor; }
+.phase-striped { border: var(--hairline) solid currentColor; background-image: repeating-linear-gradient(45deg, transparent 0 7px, color-mix(in srgb, currentColor 15%, transparent) 7px 8px); }
+.phase-filled { background: var(--off-white); color: var(--ink); }
+.phase-filled .lbl { color: color-mix(in srgb, var(--ink) 65%, transparent); }
+
+/* =====================================================================
+   RECTILINEAR — the CURRENT palantir.com marketing register (opt-in).
+   Live palantir.com controls are SQUARE (radius 0 + 1px outline), not pills —
+   the rounded/pill default above is the 2021 investor-deck convention. Add
+   class="rectilinear" to a container (or <body>) to square the controls and
+   match the current site. Circular markers (.ring / .pill-num / dotgrid dots)
+   stay round (they are the logo motif), the chamfer (.cut-*) is untouched, and
+   deck SVG bars keep their rx via deck mode.
+   ===================================================================== */
+.rectilinear .btn,
+.rectilinear .tag,
+.rectilinear .card,
+.rectilinear .input,
+.rectilinear .glass,
+.rectilinear .glass-light,
+.rectilinear img { border-radius: 0; }
+
+/* =====================================================================
+   MOTION — restraint by default; everything yields to reduced-motion.
+   The live register is uniform micro-transitions + a fire-once scroll reveal;
+   spectacle is outsourced to muted product video, not CSS animation. Pair
+   .reveal with the ~20-line IntersectionObserver in references/web.md.
+   ===================================================================== */
+/* Visible by DEFAULT — no-JS, print, and pre-JS safe. The IntersectionObserver
+   bootstrap (see references/web.md) adds `js` to <html>, which ARMS the
+   hidden→reveal animation; without that class content simply shows. Never hide
+   content on the presence of JS alone, and never in print. */
+.reveal { opacity: 1; transform: none; transition: opacity .6s ease, transform .6s ease; }
+html.js .reveal { opacity: 0; transform: translateY(14px); }
+html.js .reveal.is-in { opacity: 1; transform: none; }
+@media print { .reveal, html.js .reveal { opacity: 1 !important; transform: none !important; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal, html.js .reveal { opacity: 1 !important; transform: none !important; }
+}
