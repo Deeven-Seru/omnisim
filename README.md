@@ -129,6 +129,34 @@ python3 -m omnisim.cli terraform
 python3 -m omnisim.cli benchmark --domain systems --rollouts 500 --horizon 6
 ```
 
+### Autonomous Auto-Remediation Patch Engine
+
+Audit infrastructure code and synthesize zero-downtime Git unified diff patches ready for direct application:
+
+```bash
+python3 -m omnisim.cli patch examples/vulnerable_infrastructure.tf
+```
+
+### OmniSim Cloud & Python Client SDK
+
+OmniSim provides an enterprise Python client SDK and multi-tenant SaaS control plane with pre-flight GitHub PR webhooks:
+
+```python
+from omnisim.client import OmniSimClient
+
+client = OmniSimClient(api_key="your_tenant_key")
+audit = client.audit_pull_request(
+    hcl_code=open("main.tf").read(),
+    pr_number=42,
+    commit_sha="a1b2c3d"
+)
+
+if not audit["passed"]:
+    print(f"Violations detected: {audit['violations_count']}")
+    # Apply autonomous remediation patch directly
+    print(audit["remediation_patch"])
+```
+
 ### Canonical Microservices Reference Benchmark
 
 Run simulation across Google Cloud Online Boutique (11 services), Cornell DeathStarBench (7 services), Fudan Train-Ticket (7 services), and Tsinghua GAIA (4 services):
