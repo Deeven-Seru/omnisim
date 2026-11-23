@@ -4,6 +4,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python: 3.10+](https://img.shields.io/badge/Python-3.10%2B-brightgreen.svg)](https://python.org)
 [![Hardware: Blackwell / Hopper / Apple Silicon](https://img.shields.io/badge/Hardware-Blackwell%20%7C%20MPS%20%7C%20CUDA-green.svg)](https://nvidia.com)
+[![CI: Passing](https://img.shields.io/badge/CI-Passing-brightgreen.svg)](.github/workflows/ci.yml)
+[![Investor Memo: Seed Brief](https://img.shields.io/badge/Investor%20Memo-Confidential%20Brief-gold.svg)](INVESTOR_MEMO.md)
 
 ---
 
@@ -21,7 +23,7 @@ The LLM outputs **plausible text**. It cannot simulate the physical, logical, or
 
 **OmniSim flips this paradigm.** Built upon the theoretical foundations of **World Models, Test-Time Training (TTT), and Universal Interactive Simulators (DeepMind UniSim & Genie)**, OmniSim is a general-purpose **State-Action-Consequence (SAC)** simulation engine. 
 
-Instead of generating text, OmniSim ingests system state, models relational causal graphs, branches thousands of counterfactual intervention timelines forward in time, and outputs the exact failure modes, invariant violations, and Pareto-optimal actions before you spend a single dollar in production.
+Instead of generating text, OmniSim ingests system state, models relational causal graphs, branches tens of thousands of counterfactual intervention timelines forward in time, and outputs the exact failure modes, invariant violations, and Pareto-optimal actions before you spend a single dollar in production.
 
 ---
 
@@ -62,15 +64,22 @@ OmniSim operates across a **3-Tier Engine**:
 
 ---
 
-## 3. Quickstart & Verification
+## 3. Quickstart & Interactive Showcase
 
-### Running the CLI Engine
+### 🌐 Live Interactive Visualizer (Zero Setup)
+Launch the browser-based simulation dashboard with dynamic slider controls and real-time timeline comparison:
+```bash
+python3 -m omnisim.visualizer
+# Open http://localhost:8088 in your browser
+```
+
+### 💻 Running the Terminal Simulation
 ```bash
 # Clone and run the cloud infrastructure counterfactual simulation
 python3 -m omnisim.cli --domain systems --horizon 6
 ```
 
-### Running the Test Suite
+### 🧪 Running the Verification Test Suite
 ```bash
 python3 -m unittest discover -s tests -p "test_*.py" -v
 ```
@@ -79,17 +88,13 @@ python3 -m unittest discover -s tests -p "test_*.py" -v
 
 ## 4. Hardware Acceleration (Blackwell GPU / Marimo / Kaggle / Colab)
 
-OmniSim includes a native, reactive **Marimo notebook** designed to run seamlessly on NVIDIA Blackwell GPUs, Kaggle notebooks, Google Colab, or locally:
+OmniSim includes a native, reactive **Marimo notebook** and a one-click launcher designed to run seamlessly on NVIDIA Blackwell GPUs, Kaggle notebooks, Google Colab, or Apple Silicon:
 
 ```bash
-# Launch the reactive simulation notebook
-marimo edit notebooks/omnisim_blackwell.py
+# Launch the reactive Marimo simulation notebook
+chmod +x scripts/launch_blackwell.sh
+./scripts/launch_blackwell.sh
 ```
-
-Features in the notebook:
-* Real-time intervention parameter sliders (traffic burst scale, gateway count, DB pool size).
-* Dynamic counterfactual rollout and side-by-side branch comparison.
-* Instant invariant violation audit.
 
 ---
 
@@ -103,3 +108,8 @@ In our distributed cloud benchmark scenario, incoming traffic surges by 15% comp
 * **OmniSim Discovered Optimal Action:** **Scale DB Connection Pool (+50%).**
   * Cost: **$120.00** (vs $250.00 for gateway autoscale).
   * Result: **0 critical violations**, database latency drops by 70%, system survives traffic surge without service degradation.
+
+---
+
+## 6. Investor & Due Diligence Brief
+For technical partners and investors evaluating the Series Seed / Series A brief, read the complete [INVESTOR_MEMO.md](INVESTOR_MEMO.md) and [ARCHITECTURE.md](ARCHITECTURE.md).
