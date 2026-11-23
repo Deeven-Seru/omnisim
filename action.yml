@@ -1,20 +1,31 @@
-name: "OmniSim Pre-Flight Infrastructure Gate"
-description: "Simulates 10,000 counterfactual futures on every Terraform and Kubernetes PR before merge."
-author: "Deeven Seru"
+name: "OmniSim Pre-Flight Safety Gate"
+description: "Zero-consulting counterfactual simulation and autonomous self-healing patches for Infrastructure as Code."
+author: "Deeven-Seru"
+branding:
+  icon: "shield"
+  color: "yellow"
 
 inputs:
-  terraform-file:
-    description: "Path to the Terraform .tf file or plan to audit"
+  path:
+    description: "Path to directory or Terraform .tf manifest to audit"
     required: false
-    default: ""
-  traffic-scale:
-    description: "Multiplier of baseline traffic surge to test (e.g. 1.5 = 150% traffic)"
+    default: "examples/vulnerable_infrastructure.tf"
+  fail-on-violation:
+    description: "Whether to fail CI when critical SLA violations are caught ('true' or 'false')"
     required: false
-    default: "1.5"
-  horizon:
-    description: "Number of steps forward to simulate"
+    default: "true"
+  output-patch:
+    description: "Path where generated remediation unified diff patch should be written"
     required: false
-    default: "6"
+    default: "omnisim-remediation.patch"
+
+outputs:
+  verdict:
+    description: "Pre-flight audit verdict (PASS or BLOCKED)"
+    value: ${{ steps.audit.outputs.verdict }}
+  patch-path:
+    description: "Path to generated unified diff patch"
+    value: ${{ steps.audit.outputs.patch_path }}
 
 runs:
   using: "composite"
@@ -28,13 +39,27 @@ runs:
       shell: bash
       run: |
         python -m pip install --upgrade pip
-        pip install git+https://github.com/Deeven-Seru/omnisim.git
+        pip install "${{ github.action_path }}"
 
-    - name: Run OmniSim Pre-Flight Simulation
+    - name: Run OmniSim Pre-Flight Audit
+      id: audit
       shell: bash
       run: |
-        if [ -n "${{ inputs.terraform-file }}" ]; then
-          python -m omnisim.cli terraform --file "${{ inputs.terraform-file }}"
-        else
-          python -m omnisim.cli simulate --domain systems --horizon "${{ inputs.horizon }}"
+        echo "::group::OmniSim Pre-Flight Simulation Audit"
+        FAIL_FLAG=""
+        if [ "${{ inputs.fail-on-violation }}" = "true" ]; then
+          FAIL_FLAG="--fail-on-violation"
         fi
+
+        python -m omnisim.cli patch "${{ inputs.path }}" --output "${{ inputs.output-patch }}" $FAIL_FLAG
+        EXIT_CODE=$?
+
+        if [ -f "${{ inputs.output-patch }}" ]; then
+          echo "patch_path=${{ inputs.output-patch }}" >> $GITHUB_OUTPUT
+          echo "verdict=BLOCKED" >> $GITHUB_OUTPUT
+        else
+          echo "patch_path=" >> $GITHUB_OUTPUT
+          echo "verdict=PASS" >> $GITHUB_OUTPUT
+        fi
+        echo "::endgroup::"
+        exit $EXIT_CODE

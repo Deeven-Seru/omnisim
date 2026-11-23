@@ -173,7 +173,7 @@ def run_terraform_audit_cmd(hcl_text: str = "") -> None:
         print("\n[OK] Terraform plan passed all pre-flight counterfactual checks.\n")
 
 
-def run_patch_cmd(hcl_text: str = "") -> None:
+def run_patch_cmd(hcl_text: str = "", fail_on_violation: bool = False, output_file: str = "") -> None:
     print("\n[AUTO_REMEDIATION] Analyzing infrastructure code for autonomous self-healing...")
     if not hcl_text:
         hcl_text = """
@@ -199,6 +199,15 @@ def run_patch_cmd(hcl_text: str = "") -> None:
         for r in result.applied_rules:
             print(f"[REMEDIATION_RULE] {r}")
         print("\nApply this patch directly via: `git apply remediation.patch`\n")
+
+        if output_file:
+            with open(output_file, "w") as out_f:
+                out_f.write(result.unified_diff)
+            print(f"[OK] Wrote patch to {output_file}")
+
+        if fail_on_violation:
+            print("[GATEKEEPER_BLOCKED] CI gatekeeper blocking deployment due to critical capacity breaches.")
+            sys.exit(1)
     else:
         print("[OK] Infrastructure code is resilient. 0 violations detected.\n")
 
@@ -260,6 +269,8 @@ def main(argv: list[str] | None = None) -> None:
     patch_parser = subparsers.add_parser("patch", help="Generate automated Git unified diff patch for vulnerable infrastructure")
     patch_parser.add_argument("file", nargs="?", default="", help="Path to .tf or plan file (positional)")
     patch_parser.add_argument("--file", dest="file_flag", type=str, default="", help="Path to .tf or plan file")
+    patch_parser.add_argument("--fail-on-violation", action="store_true", help="Exit with non-zero code if vulnerabilities are detected")
+    patch_parser.add_argument("--output", "-o", type=str, default="", help="Write unified diff patch to output file")
 
     # vc-gauntlet command
     gauntlet_parser = subparsers.add_parser("vc-gauntlet", help="Run Ruthless VC Zero-Bias Diligence Gauntlet")
@@ -278,7 +289,11 @@ def main(argv: list[str] | None = None) -> None:
         if target_path:
             with open(target_path, "r") as f:
                 hcl_content = f.read()
-        run_patch_cmd(hcl_content)
+        run_patch_cmd(
+            hcl_content,
+            fail_on_violation=getattr(args, "fail_on_violation", False),
+            output_file=getattr(args, "output", "")
+        )
     elif args.command == "canonical-benchmarks":
         from benchmarks.canonical_microservices_benchmark import CanonicalMicroservicesBenchmarkSuite
         suite = CanonicalMicroservicesBenchmarkSuite()

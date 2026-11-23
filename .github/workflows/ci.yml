@@ -39,3 +39,14 @@ jobs:
           python -m omnisim.cli vc-gauntlet
           python -m omnisim.cli dataset-benchmark
           python -m omnisim.cli canonical-benchmarks
+
+      - name: Verify GitHub Action Pre-Flight Gate
+        uses: ./
+        with:
+          path: "examples/safe_infrastructure.tf"
+          fail-on-violation: "true"
+
+      - name: Verify Package Build
+        run: |
+          pip install build
+          python -m build

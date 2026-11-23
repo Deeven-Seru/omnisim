@@ -3,10 +3,44 @@ name = "omnisim"
 version = "0.1.0"
 description = "OmniSim: The Universal Counterfactual Simulation Engine - Beyond Probabilistic Text Generation to Action-Conditioned World Simulation"
 readme = "README.md"
+authors = [
+    { name = "Deeven Seru", email = "deevenseru11@gmail.com" }
+]
+license = { text = "MIT" }
 requires-python = ">=3.10"
+keywords = [
+    "counterfactual-simulation",
+    "reliability-engineering",
+    "infrastructure-as-code",
+    "sre",
+    "chaos-engineering",
+    "mcts",
+    "terraform"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Software Development :: Testing",
+]
 dependencies = [
     "numpy>=1.24.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/Deeven-Seru/omnisim"
+Repository = "https://github.com/Deeven-Seru/omnisim"
+Issues = "https://github.com/Deeven-Seru/omnisim/issues"
+Documentation = "https://github.com/Deeven-Seru/omnisim#readme"
+
+[project.scripts]
+omnisim = "omnisim.cli:main"
 
 [project.optional-dependencies]
 accelerated = [

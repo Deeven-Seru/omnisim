@@ -89,6 +89,26 @@ cd omnisim
 pip install .
 ```
 
+### 60-Second CI/CD Integration: GitHub Action
+
+Drop OmniSim directly into any repository's `.github/workflows/` to block cascading outages before code merges:
+
+```yaml
+name: OmniSim Safety Gate
+on: [pull_request]
+
+jobs:
+  pre-flight-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: OmniSim Pre-Flight Safety Gate
+        uses: Deeven-Seru/omnisim@main
+        with:
+          path: terraform/
+          fail-on-violation: "true"
+```
+
 ### Launch OmniSim Cloud SaaS Portal & API Gateway
 
 Launches the multi-tenant SaaS control plane with live organization quotas, GitHub PR pre-flight gatekeeper feed, and REST APIs:
